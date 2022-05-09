@@ -1,12 +1,17 @@
 import math
 
-
+"""
+Geometry helper is a place to define basic geometric operations that are often used.
+"""
 def dist(x1,y1 , x2,y2):
+    """Function dist calculates the distance between two 2-D points"""
     dx = x1 - x2
     dy = y1 - y2
     return math.sqrt((dx * dx) + (dy * dy))
 
+
 def find_intersect(ray, wall):
+    """Function find_intersect find the intersection between a ray and a wall (two 2-D line segments), if it exists"""
     w_x1 = wall.x1
     w_y1 = wall.y1
     w_x2 = wall.x2
