@@ -1,7 +1,7 @@
 import pygame
 import math
 
-from Code.helpers.collisions import *
+from helpers.collisions import *
 
 class Ray:
     """

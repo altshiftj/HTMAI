@@ -1,6 +1,6 @@
 import math
 import pygame
-from Code.helpers.geometry import *
+from helpers.geometry import *
 
 
 class Wall:

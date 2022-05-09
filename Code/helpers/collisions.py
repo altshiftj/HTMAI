@@ -1,4 +1,4 @@
-from Code.helpers.geometry import *
+from helpers.geometry import *
 
 """
 Collision helper is a collection of mathematical functions used to calculate collisions between objects
