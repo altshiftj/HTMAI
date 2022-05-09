@@ -1,4 +1,3 @@
-import math
 import pygame
 from helpers.geometry import *
 
