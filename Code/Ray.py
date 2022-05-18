@@ -10,11 +10,17 @@ class Ray:
     y - y-position
     angle = orientation (degrees)
     """
-    def __init__(self, x, y, angle, color='white'):
+    def __init__(self, x, y, angle, max_length, color='white'):
         self.x1 = x
         self.y1 = y
-        self.angle = math.radians(angle)
+        self.degree_angle = angle
+        if angle>=360:
+            self.degree_angle-=360
+        if angle<0:
+            self.degree_angle+=360
+        self.angle = math.radians(self.degree_angle)
         self.length = 1
+        self.max_length = max_length
         self.x2 = self.x1 + self.length * math.cos(self.angle)
         self.y2 = self.y1 + self.length * math.sin(self.angle)
         self.color = color
@@ -24,8 +30,18 @@ class Ray:
         """Function update takes in an x, y, and angle, and updates the ray to this position and orientation"""
         self.x1 = x
         self.y1 = y
+        self.degree_angle=angle
+        if angle>=360:
+            self.degree_angle-=360
+        if angle<0:
+            self.degree_angle+=360
         self.angle = math.radians(angle)
+
         ray_collision(self, box)
+
+        return
+
+
 
 
     def draw(self, display):

@@ -22,8 +22,8 @@ class Animal:
         self.size = size
         self.head_direction = head_direction
         self.field_of_view = field_of_view
-        self.brain = Brain()
-        self.eye = Eye(x, y, head_direction, field_of_view)
+        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, 10)
+        self.brain = Brain(self.eye)
         self.color = color
 
 
@@ -34,20 +34,26 @@ class Animal:
 
     def think(self):
         """Function think passes encoded Eye SDR to Brain for Spatial Pooling and Temporal Memory functions"""
-        self.brain.interpret(self.eye.vision)
+        self.brain.thought_count+=1
+        self.brain.encode(self.eye)
+        self.brain.pool()
+        self.brain.temporal()
 
 
     def move(self, step_size_move, box, direction):
         """Function move takes in a step size (speed), environment, and forward or backward direction
         to define movement. Animal moves within the environment checking for collisions as it goes"""
         if direction == 'forward':
+
             for wall in box.walls:
                 collision = move_collision(self, wall, True)
                 if collision:
                     break
+
             if not collision:
                 self.x += step_size_move * math.cos(math.radians(self.head_direction))
                 self.y += step_size_move * math.sin(math.radians(self.head_direction))
+
 
         if direction == 'backward':
             for wall in box.walls:
@@ -61,8 +67,16 @@ class Animal:
 
     def turn(self, step_size_turn):
         """Function turn takes in a step size (angular speed) and augments head direction accordingly
-        (CCW+ convention)"""
-        self.head_direction -= step_size_turn
+        (CW+ convention)"""
+        #self.eye.direction = self.head_direction
+        if (self.head_direction + step_size_turn)>=360:
+            self.head_direction -= 360
+        elif (self.head_direction + step_size_turn) < 0:
+            self.head_direction += 360
+
+        self.head_direction+=step_size_turn
+        return
+
 
 
     def random_walk(self):

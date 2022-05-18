@@ -1,15 +1,21 @@
-from htm.bindings.sdr import SDR
+import math
+
+import htm
+from htm.bindings.sdr import *
+from htm.encoders import *
+from htm.bindings.algorithms import SpatialPooler
+from htm.bindings.algorithms import TemporalMemory
+from helpers.encode_helper import *
+from helpers.display_SDR import *
 
 from Ray import *
 
 
 # number of rays in vision array
-number_of_rays = 30
 class Eye:
     """
     Eye Class defines an array of rays cast out in an environment. Rays are cast out in a width range about
-    a head direction. Length and orientation of each ray are encoded into an SDR to be sent to Brain for
-    Spatial Pooling
+    a head direction.
 
     x - start x-position of rays
     y - starting y-position of rays
@@ -19,13 +25,22 @@ class Eye:
     number_of_rays - quantity of rays in vision array
     """
 
-    def __init__(self, x, y, direction, field_of_view):
+    def __init__(self, x, y, direction, field_of_view, min_vision, max_vision, number_of_rays):
         self.vision = []
         self.field_of_view = field_of_view
+        self.number_of_rays = number_of_rays
+        self.min_vision = min_vision
+        self.max_vision = max_vision
+        self.direction = direction
 
-        for a in range(direction - int(field_of_view / 2), direction + int(field_of_view / 2),
-                       int(field_of_view/number_of_rays)):
-            self.vision.append(Ray(x, y, a))
+        ang = 0
+        del_angle = int(self.field_of_view/(self.number_of_rays))
+        start = self.direction - int(self.field_of_view/2)
+        while ang*del_angle<=self.field_of_view:
+            self.vision.append(Ray(x, y, start+ang*del_angle, max_vision))
+            ang+=1
+
+        return
 
 
     def see(self, box, x, y, direction):
@@ -33,13 +48,10 @@ class Eye:
         checks for collisions and updates their endpoints accordingly"""
         i = 0
         for ray in self.vision:
-            ray.update(x, y, direction-int(self.field_of_view/2)+(int(self.field_of_view/number_of_rays))*i, box)
+            ray.update(x, y, direction-int(self.field_of_view/2)+(int(self.field_of_view/(self.number_of_rays)))*i, box)
             i += 1
 
-
-    def encode(self):
-        """Function encode encodes the length and orientation of each ray in vision into SDRs"""
-        pass
+        return
 
 
     def draw(self,display):

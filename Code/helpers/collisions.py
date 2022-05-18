@@ -1,3 +1,5 @@
+import math
+
 from helpers.geometry import *
 
 """
@@ -18,9 +20,10 @@ def ray_collision(ray, box):
             ray.length = dist(ray.x1, ray.y1, intersect_point[0], intersect_point[1])
             if (ray.length < closest):
                 closest = ray.length
-    ray.length = closest
+    ray.length = min(closest, ray.max_length)
     ray.x2 = ray.x1 + ray.length * math.cos(ray.angle)
     ray.y2 = ray.y1 + ray.length * math.sin(ray.angle)
+    return
 
 
 def move_collision(animal, wall, move_dir):
@@ -42,10 +45,10 @@ def move_collision(animal, wall, move_dir):
     a_radius = animal.size
 
     # animals next potential moves, forward and backward
-    a_x_next_forward = a_x + 0.1 * math.cos(animal.head_direction)
-    a_y_next_forward = a_y + 0.1 * math.sin(animal.head_direction)
-    a_x_next_back = a_x - 0.1 * math.cos(animal.head_direction)
-    a_y_next_back = a_y - 0.1 * math.sin(animal.head_direction)
+    a_x_next_forward = a_x + 0.1 * math.cos(math.radians(animal.head_direction))
+    a_y_next_forward = a_y + 0.1 * math.sin(math.radians(animal.head_direction))
+    a_x_next_back = a_x - 0.1 * math.cos(math.radians(animal.head_direction))
+    a_y_next_back = a_y - 0.1 * math.sin(math.radians(animal.head_direction))
 
     # a buffer zone around wall end points
     buffer = a_radius
