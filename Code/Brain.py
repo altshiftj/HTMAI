@@ -57,14 +57,14 @@ class Brain:
         # region Spatial Pooler
         self.spatial_pooler = SP(
             inputDimensions=[self.vision_encoding_width],
-            columnDimensions=[100],
+            columnDimensions=[64],
             potentialRadius=16,
-            potentialPct=0.85,
+            potentialPct=0.65,
             globalInhibition=True,
             localAreaDensity=0.1,
-            synPermInactiveDec=0.006,
-            synPermActiveInc=0.04,
-            synPermConnected=0.13,
+            synPermInactiveDec=0.5,
+            synPermActiveInc=0.75,
+            synPermConnected=0.4,
             boostStrength=3,
             wrapAround=True
         )
@@ -74,14 +74,14 @@ class Brain:
         # region Temporal Memory
         self.tm = TM(
             columnDimensions=self.spatial_pooler.getColumnDimensions(),
-            cellsPerColumn=5,
+            cellsPerColumn=10,
             activationThreshold=17,
             initialPermanence=0.21,
             connectedPermanence=self.spatial_pooler.getSynPermConnected(),
             minThreshold=10,
             maxNewSynapseCount=32,
-            permanenceIncrement=0.1,
-            permanenceDecrement=0.1,
+            permanenceIncrement=0.75,
+            permanenceDecrement=0.5,
             predictedSegmentDecrement=0.0,
             seed=0,
             maxSegmentsPerCell=128,
@@ -114,7 +114,6 @@ class Brain:
         self.active_columns = SDR(self.spatial_pooler.getColumnDimensions())
         self.spatial_pooler.compute( self.vision_SDR, True, self.active_columns )
         self.sp_info.addData( self.active_columns )
-
 
         return
 
