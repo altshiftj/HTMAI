@@ -22,7 +22,7 @@ class Animal:
         self.size = size
         self.head_direction = head_direction
         self.field_of_view = field_of_view
-        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, 10)
+        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, 2)
         self.brain = Brain(self.eye)
         self.color = color
 

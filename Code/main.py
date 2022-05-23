@@ -1,4 +1,4 @@
-
+import numpy as np
 from pygame.locals import *             # import for quit
 import pygame                           # import for display and update
 import sys                              # import for exit
@@ -7,6 +7,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use("TkAgg")
 
+from helpers.display_temp_mem import *
+plt.ion()
 
 from Box import *
 from Animal import *
@@ -61,20 +63,6 @@ def draw():
     # update the display
     pygame.display.update()
 
-
-
-
-mouse.look(box)
-mouse.think()
-
-x_val = [i for i in range(1, mouse.brain.tm_info.dimensions[0] + 1)]
-y_val = mouse.brain.tm_info.activationFrequency.activationFrequency
-
-plt.ion()
-figure = plt.figure()
-ax = figure.add_subplot(111)
-line, = ax.plot(x_val,y_val)
-
 # to do while running pygame
 while running:
     # Animal actions, i.e. look and move.
@@ -90,6 +78,9 @@ while running:
     if keys[pygame.K_UP]:
         mouse.move(.5,box,'forward')
 
+    if keys[pygame.K_SPACE]:
+        display_active_freq(mouse)
+
 
     # capture events in pygame i.e. exit, keystrokes, etc.
     for event in pygame.event.get():
@@ -101,16 +92,14 @@ while running:
 
     # draw all shapes/images
 
+
+
     mouse.look(box)
     draw()
 
     mouse.think()
 
-    if count % 100 == 0:
-        update_y = mouse.brain.tm_info.activationFrequency.activationFrequency
-        line.set_ydata(update_y)
-        figure.canvas.draw()
-        figure.canvas.flush_events()
+
 
     # mouse.turn(turn[count])
     # mouse.move(0.1,box,'forward')

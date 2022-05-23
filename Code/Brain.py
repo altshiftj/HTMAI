@@ -57,15 +57,21 @@ class Brain:
         # region Spatial Pooler
         self.spatial_pooler = SP(
             inputDimensions=[self.vision_encoding_width],
-            columnDimensions=[64],
+            columnDimensions=[512],
             potentialRadius=16,
-            potentialPct=0.65,
+            potentialPct=0.4,
             globalInhibition=True,
-            localAreaDensity=0.1,
-            synPermInactiveDec=0.5,
-            synPermActiveInc=0.75,
-            synPermConnected=0.4,
+            localAreaDensity=0.04,
+            #numActiveColumnsPerInhArea=0,
+            #stimulusThreshold=0,
+            synPermInactiveDec=0.25,
+            synPermActiveInc=0.04,
+            synPermConnected=0.5,
+            #minPctOverlapDutyCycle=0,
+            #dutyCyclePeriod=0,
             boostStrength=3,
+            #seed=0,
+            #spVerbosity=0,
             wrapAround=True
         )
         self.sp_info = Metrics(self.spatial_pooler.getColumnDimensions(), 999999999)
@@ -74,20 +80,20 @@ class Brain:
         # region Temporal Memory
         self.tm = TM(
             columnDimensions=self.spatial_pooler.getColumnDimensions(),
-            cellsPerColumn=10,
-            activationThreshold=17,
+            cellsPerColumn=32,
+            activationThreshold=15,
             initialPermanence=0.21,
             connectedPermanence=self.spatial_pooler.getSynPermConnected(),
             minThreshold=10,
-            maxNewSynapseCount=32,
-            permanenceIncrement=0.75,
-            permanenceDecrement=0.5,
-            predictedSegmentDecrement=0.0,
-            seed=0,
+            maxNewSynapseCount=2,
+            permanenceIncrement=0.1,
+            permanenceDecrement=0.1,
+            predictedSegmentDecrement=0.01,
+            #seed=0,
             maxSegmentsPerCell=128,
-            maxSynapsesPerSegment=64,
-            checkInputs=0,
-            externalPredictiveInputs=0
+            maxSynapsesPerSegment=32,
+            #checkInputs=0,
+            #externalPredictiveInputs=0
         )
         self.tm_info = Metrics([self.tm.numberOfCells()], 999999999)
         # endregion
