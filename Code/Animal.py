@@ -1,3 +1,4 @@
+import math
 import random   #for random walk
 from Brain import *
 from Eye import *
@@ -22,7 +23,7 @@ class Animal:
         self.size = size
         self.head_direction = head_direction
         self.field_of_view = field_of_view
-        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, 2)
+        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, 45)
         self.brain = Brain(self.eye)
         self.color = color
 
@@ -66,9 +67,14 @@ class Animal:
 
 
     def turn(self, step_size_turn):
-        """Function turn takes in a step size (angular speed) and augments head direction accordingly
-        (CW+ convention)"""
-        #self.eye.direction = self.head_direction
+
+        # if xdir==0:
+        #     xdir-=.01
+        #
+        # theta = math.atan2(ydir,xdir)
+        #
+        # self.head_direction = math.degrees(theta)
+
         if (self.head_direction + step_size_turn)>=360:
             self.head_direction -= 360
         elif (self.head_direction + step_size_turn) < 0:
@@ -76,7 +82,6 @@ class Animal:
 
         self.head_direction+=step_size_turn
         return
-
 
 
     def random_walk(self):

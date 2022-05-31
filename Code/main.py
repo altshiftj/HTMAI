@@ -17,18 +17,19 @@ from Animal import *
 Purpose of main is to manage the relationship between class Box and Animal, as well as implement pygame display
 """
 #instantiate Box
-box = Box(1200,800)
-box.add_object(100,75,1100,100)
-box.add_object(150,175,550,200)
-box.add_object(650,175,1050,200)
-
-box.add_object(100,400,200,500)
-box.add_object(300,600,500,700)
-box.add_object(900,300,1150,475)
-box.add_object(575,375,725,450)
+box = Box(600,400)
+# box.add_object(100,75,1100,100)
+# box.add_object(150,175,550,200)
+# box.add_object(650,175,1050,200)
+#
+# box.add_object(100,400,200,500)
+# box.add_object(300,600,500,700)
+# box.add_object(900,300,1150,475)
+# box.add_object(575,375,725,450)
 
 #instantiate Animal
-mouse = Animal(300,400,10,0,270)
+mouse = Animal(300,200,10,0,270)
+track = False
 
 #instantiate pygame environment
 pygame.init()
@@ -38,10 +39,12 @@ display = pygame.Surface(WINDOW_SIZE)
 running = True
 
 # region Autoturn
-# noise = PerlinNoise()
+# noisex = PerlinNoise()
+# noisey = PerlinNoise()
 count = 0
-# perlin = [i*0.001 for i in range(50000)]
-# turn = [2*noise(i) for i in perlin]
+# perlin = [i*0.005 for i in range(500000)]
+# xdir = [noisex(i) for i in perlin]
+# ydir = [noisey(i) for i in perlin]
 # endregion
 
 def draw():
@@ -57,6 +60,8 @@ def draw():
     # draw Animal, including casted vision rays
     mouse.draw(display)
 
+    mouse.brain.draw_most_active_cell(display)
+
     # draw image
     screen_box.blit(display, (0, 0))
 
@@ -64,25 +69,37 @@ def draw():
     pygame.display.update()
 
 # to do while running pygame
-while running:
+while count<1000000:
     # Animal actions, i.e. look and move.
     # current inputs, mouse moves forward
 
     keys = pygame.key.get_pressed()
+    #region Keyboard Move (commented)
+
     if keys[pygame.K_RIGHT]:
-        mouse.turn(.1)
+        mouse.turn(.5)
 
     if keys[pygame.K_LEFT]:
-        mouse.turn(-.1)
+        mouse.turn(-.5)
 
     if keys[pygame.K_UP]:
-        mouse.move(.5,box,'forward')
+        mouse.move(1,box,'forward')
 
-    if keys[pygame.K_SPACE]:
+    # endregion
+
+    if keys[pygame.K_c]:
+        display_active_cells(mouse)
+
+    if keys[pygame.K_f]:
         display_active_freq(mouse)
 
+    if keys[pygame.K_SPACE]:
+        mouse.brain.cell_fire_location.clear()
+        mouse.brain.find_most_active_neuron()
+        track = True
 
-    # capture events in pygame i.e. exit, keystrokes, etc.
+
+    #capture events in pygame i.e. exit, keystrokes, etc.
     for event in pygame.event.get():
 
         # handle exiting the window
@@ -92,17 +109,17 @@ while running:
 
     # draw all shapes/images
 
-
-
     mouse.look(box)
+
     draw()
 
     mouse.think()
 
+    # mouse.turn(xdir[count], ydir[count])
+    # mouse.move(.5,box,'forward')
 
-
-    # mouse.turn(turn[count])
-    # mouse.move(0.1,box,'forward')
+    if track:
+        mouse.brain.track_most_active_neuron(mouse)
 
     count+=1
 
