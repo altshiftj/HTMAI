@@ -26,10 +26,10 @@ def move_collision(ray, wall, key):
     a_y = ray.y1
     a_radius = ray.size
 
-    a_x_next_forward = a_x + 0.1 * math.cos(ray.angle)
-    a_y_next_forward = a_y + 0.1 * math.sin(ray.angle)
-    a_x_next_back = a_x - 0.1 * math.cos(ray.angle)
-    a_y_next_back = a_y - 0.1 * math.sin(ray.angle)
+    a_x_next_forward = a_x + 0.1 * math.cos(ray.alloc_angle)
+    a_y_next_forward = a_y + 0.1 * math.sin(ray.alloc_angle)
+    a_x_next_back = a_x - 0.1 * math.cos(ray.alloc_angle)
+    a_y_next_back = a_y - 0.1 * math.sin(ray.alloc_angle)
 
     buffer = a_radius
 
@@ -183,10 +183,10 @@ def move_collision(ray, wall, key):
     a_y = ray.y1
     a_radius = ray.size
 
-    a_x_next_forward = a_x + 0.1 * math.cos(ray.angle)
-    a_y_next_forward = a_y + 0.1 * math.sin(ray.angle)
-    a_x_next_back = a_x - 0.1 * math.cos(ray.angle)
-    a_y_next_back = a_y - 0.1 * math.sin(ray.angle)
+    a_x_next_forward = a_x + 0.1 * math.cos(ray.alloc_angle)
+    a_y_next_forward = a_y + 0.1 * math.sin(ray.alloc_angle)
+    a_x_next_back = a_x - 0.1 * math.cos(ray.alloc_angle)
+    a_y_next_back = a_y - 0.1 * math.sin(ray.alloc_angle)
 
     buffer = a_radius
 

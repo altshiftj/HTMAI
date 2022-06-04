@@ -17,7 +17,7 @@ from Animal import *
 Purpose of main is to manage the relationship between class Box and Animal, as well as implement pygame display
 """
 #instantiate Box
-box = Box(600,400)
+box = Box(800,600)
 # box.add_object(100,75,1100,100)
 # box.add_object(150,175,550,200)
 # box.add_object(650,175,1050,200)
@@ -42,7 +42,7 @@ running = True
 # noisex = PerlinNoise()
 # noisey = PerlinNoise()
 count = 0
-# perlin = [i*0.005 for i in range(500000)]
+# perlin = [i*0.005 for i in range(10000)]
 # xdir = [noisex(i) for i in perlin]
 # ydir = [noisey(i) for i in perlin]
 # endregion
@@ -95,7 +95,7 @@ while count<1000000:
 
     if keys[pygame.K_SPACE]:
         mouse.brain.cell_fire_location.clear()
-        mouse.brain.find_most_active_neuron()
+        mouse.brain.find_most_active_neuron(mouse.brain.L6a_location_tm_info)
         track = True
 
 
@@ -113,13 +113,15 @@ while count<1000000:
 
     draw()
 
-    mouse.think()
+
 
     # mouse.turn(xdir[count], ydir[count])
     # mouse.move(.5,box,'forward')
 
+    mouse.think()
+
     if track:
-        mouse.brain.track_most_active_neuron(mouse)
+        mouse.brain.track_most_active_neuron(mouse, mouse.brain.L6a_location_tm)
 
     count+=1
 

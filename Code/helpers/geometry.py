@@ -19,8 +19,8 @@ def find_intersect(ray, wall):
 
     r_x1 = ray.x1
     r_y1 = ray.y1
-    r_x2 = ray.x1 + ray.length * math.cos(ray.angle)
-    r_y2 = ray.y1 + ray.length * math.sin(ray.angle)
+    r_x2 = ray.x1 + ray.length * math.cos(ray.alloc_angle)
+    r_y2 = ray.y1 + ray.length * math.sin(ray.alloc_angle)
 
     # Using line-line intersection formula to get intersection point of ray and wall
     # Where (w_x1, w_y1), (w_x2, w_y2) are the wall pos and (r_x1, r_y1), (r_x2, r_y2) are the ray pos

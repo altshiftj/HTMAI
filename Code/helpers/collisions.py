@@ -21,8 +21,8 @@ def ray_collision(ray, box):
             if (ray.length < closest):
                 closest = ray.length
     ray.length = min(closest, ray.max_length)
-    ray.x2 = ray.x1 + ray.length * math.cos(ray.angle)
-    ray.y2 = ray.y1 + ray.length * math.sin(ray.angle)
+    ray.x2 = ray.x1 + ray.length * math.cos(ray.alloc_angle)
+    ray.y2 = ray.y1 + ray.length * math.sin(ray.alloc_angle)
     return
 
 

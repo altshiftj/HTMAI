@@ -20,11 +20,17 @@ class Animal:
     def __init__(self, x, y, size, head_direction, field_of_view, color='white'):
         self.x = x
         self.y = y
+        self.linear_speed = 0
+        self.angular_velocity = 0
+
         self.size = size
+
         self.head_direction = head_direction
         self.field_of_view = field_of_view
-        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, 45)
-        self.brain = Brain(self.eye)
+
+        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, 15)
+        self.brain = Brain(self.eye, metrics_on=False)
+
         self.color = color
 
 
@@ -36,15 +42,20 @@ class Animal:
     def think(self):
         """Function think passes encoded Eye SDR to Brain for Spatial Pooling and Temporal Memory functions"""
         self.brain.thought_count+=1
-        self.brain.encode(self.eye)
-        self.brain.pool()
-        self.brain.temporal()
+        self.brain.pool_loc2sense()
+        self.brain.temporal_senses()
+        self.brain.encode_vision(self.eye)
+        self.brain.pool_senses()
+        self.brain.temporal_senses()
+        self.brain.pool_sense2loc()
+        self.brain.temporal_location()
 
 
     def move(self, step_size_move, box, direction):
         """Function move takes in a step size (speed), environment, and forward or backward direction
         to define movement. Animal moves within the environment checking for collisions as it goes"""
         if direction == 'forward':
+            self.linear_speed += step_size_move
 
             for wall in box.walls:
                 collision = move_collision(self, wall, True)
@@ -55,24 +66,36 @@ class Animal:
                 self.x += step_size_move * math.cos(math.radians(self.head_direction))
                 self.y += step_size_move * math.sin(math.radians(self.head_direction))
 
+                if self.brain.thought_count%25==0:
+                    self.brain.encode_movement(self.linear_speed, 0)
+                    self.brain.pool_movement()
+                    self.brain.temporal_location()
+                    self.linear_speed = 0
+
 
         if direction == 'backward':
+            self.linear_speed = -step_size_move
+
             for wall in box.walls:
                 collision = move_collision(self, wall, False)
                 if collision:
                     break
+
             if not collision:
                 self.x -= step_size_move * math.cos(math.radians(self.head_direction))
                 self.y -= step_size_move * math.sin(math.radians(self.head_direction))
+                self.brain.encode_movement(self.linear_speed, 0)
+                self.brain.pool_movement()
+                self.brain.temporal_location()
 
 
     def turn(self, step_size_turn):
 
         # if xdir==0:
-        #     xdir-=.01
+        #     xdir+=.01
         #
         # theta = math.atan2(ydir,xdir)
-        #
+        # self.angular_velocity = self.head_direction - math.degrees(theta)
         # self.head_direction = math.degrees(theta)
 
         if (self.head_direction + step_size_turn)>=360:
@@ -80,7 +103,15 @@ class Animal:
         elif (self.head_direction + step_size_turn) < 0:
             self.head_direction += 360
 
-        self.head_direction+=step_size_turn
+        self.head_direction += step_size_turn
+        self.angular_velocity += step_size_turn
+
+        if self.brain.thought_count%25 == 0:
+            self.brain.encode_movement(0,self.angular_velocity)
+            self.brain.pool_movement()
+            self.brain.temporal_location()
+            self.angular_velocity=0
+
         return
 
 

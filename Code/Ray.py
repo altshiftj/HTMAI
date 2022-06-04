@@ -10,32 +10,42 @@ class Ray:
     y - y-position
     angle = orientation (degrees)
     """
-    def __init__(self, x, y, angle, max_length, color='white'):
+    def __init__(self, x, y, alloc_angle, ego_angle, max_length, color='white'):
         self.x1 = x
         self.y1 = y
-        self.degree_angle = angle
-        if angle>=360:
-            self.degree_angle-=360
-        if angle<0:
-            self.degree_angle+=360
-        self.angle = math.radians(self.degree_angle)
+
+        self.degree_alloc_angle = alloc_angle
+        if alloc_angle>=360:
+            self.degree_alloc_angle-=360
+        if alloc_angle<0:
+            self.degree_alloc_angle+=360
+        self.alloc_angle = math.radians(self.degree_alloc_angle)
+
+        self.degree_ego_angle = ego_angle
+        if ego_angle>=360:
+            self.degree_ego_angle-=360
+        if ego_angle<0:
+            self.degree_ego_angle+=360
+
         self.length = 1
         self.max_length = max_length
-        self.x2 = self.x1 + self.length * math.cos(self.angle)
-        self.y2 = self.y1 + self.length * math.sin(self.angle)
+
+        self.x2 = self.x1 + self.length * math.cos(self.alloc_angle)
+        self.y2 = self.y1 + self.length * math.sin(self.alloc_angle)
+
         self.color = color
 
 
-    def update(self, x, y, angle, box):
+    def update(self, x, y, alloc_angle, box):
         """Function update takes in an x, y, and angle, and updates the ray to this position and orientation"""
         self.x1 = x
         self.y1 = y
-        self.degree_angle=angle
-        if angle>=360:
-            self.degree_angle-=360
-        if angle<0:
-            self.degree_angle+=360
-        self.angle = math.radians(angle)
+        self.degree_alloc_angle=alloc_angle
+        if alloc_angle>=360:
+            self.degree_alloc_angle-=360
+        if alloc_angle<0:
+            self.degree_alloc_angle+=360
+        self.alloc_angle = math.radians(alloc_angle)
 
         ray_collision(self, box)
 
