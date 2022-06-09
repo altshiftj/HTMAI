@@ -1,6 +1,7 @@
 import numpy as np
 from pygame.locals import *             # import for quit
 import pygame                           # import for display and update
+import csv
 import sys                              # import for exit
 from perlin_noise import PerlinNoise    #
 import matplotlib
@@ -38,13 +39,18 @@ screen_box = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(WINDOW_SIZE)
 running = True
 
+f = open('cell_fire.csv', 'w', newline='')
+header = ['thought count', 'cell', 'column', 'x', 'y']
+writer = csv.writer(f)
+writer.writerow(header)
+
 # region Autoturn
-# noisex = PerlinNoise()
-# noisey = PerlinNoise()
+noisex = PerlinNoise()
+noisey = PerlinNoise()
 count = 0
-# perlin = [i*0.005 for i in range(10000)]
-# xdir = [noisex(i) for i in perlin]
-# ydir = [noisey(i) for i in perlin]
+perlin = [i*0.003 for i in range(75000)]
+xdir = [noisex(i) for i in perlin]
+ydir = [noisey(i) for i in perlin]
 # endregion
 
 def draw():
@@ -69,7 +75,7 @@ def draw():
     pygame.display.update()
 
 # to do while running pygame
-while count<1000000:
+while count<74999:
     # Animal actions, i.e. look and move.
     # current inputs, mouse moves forward
 
@@ -113,17 +119,39 @@ while count<1000000:
 
     draw()
 
+    mouse.turn(xdir[count], ydir[count])
+    mouse.move(2,box,'forward')
 
-
-    # mouse.turn(xdir[count], ydir[count])
-    # mouse.move(.5,box,'forward')
-
+    #if count%1 == 0:
     mouse.think()
 
     if track:
         mouse.brain.track_most_active_neuron(mouse, mouse.brain.L6a_location_tm)
 
+    if 73900<count<74900 and count%4==0:
+        cells_active = mouse.brain.L6a_location_tm.getActiveCells().sparse
+        column_number_prev=-1
+        for i in range(len(cells_active)):
+            cell_number = cells_active[i]
+            column_number = mouse.brain.L6a_location_tm.columnForCell(cell_number)
+            if column_number == column_number_prev:
+                continue
+            column_number_prev = mouse.brain.L6a_location_tm.columnForCell(cell_number)
+            x = int(mouse.x)
+            y = int(mouse.y)
+
+            data = [count, column_number, x, y]
+            writer.writerow(data)
     count+=1
+
+mouse.brain.L6atoL4_interlayer_sp.saveToFile('locISP', 'BINARY')
+mouse.brain.L6a_location_tm.saveToFile('locTM', 'BINARY')
+mouse.brain.L6a_location_sp.saveToFile('locTM', 'BINARY')
+mouse.brain.L4toL6a_interlayer_sp.saveToFile('senISP', 'BINARY')
+mouse.brain.L4_sensory_tm.saveToFile('senTM', 'BINARY')
+mouse.brain.L4_sensory_sp.saveToFile('senSP', 'BINARY')
+
+
 
 
 

@@ -29,7 +29,7 @@ class Animal:
         self.field_of_view = field_of_view
 
         self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, 15)
-        self.brain = Brain(self.eye, metrics_on=False)
+        self.brain = Brain(self.eye, metrics_on=True)
 
         self.color = color
 
@@ -66,7 +66,7 @@ class Animal:
                 self.x += step_size_move * math.cos(math.radians(self.head_direction))
                 self.y += step_size_move * math.sin(math.radians(self.head_direction))
 
-                if self.brain.thought_count%25==0:
+                if self.brain.thought_count%1==0:
                     self.brain.encode_movement(self.linear_speed, 0)
                     self.brain.pool_movement()
                     self.brain.temporal_location()
@@ -89,24 +89,24 @@ class Animal:
                 self.brain.temporal_location()
 
 
-    def turn(self, step_size_turn):
+    def turn(self, xdir, ydir):
 
-        # if xdir==0:
-        #     xdir+=.01
+        if xdir==0:
+            xdir+=.01
+
+        theta = math.atan2(ydir,xdir)
+        self.angular_velocity += (math.degrees(theta) - self.head_direction)
+        self.head_direction = math.degrees(theta)
+
+        # if (self.head_direction + step_size_turn)>=360:
+        #     self.head_direction -= 360
+        # elif (self.head_direction + step_size_turn) < 0:
+        #     self.head_direction += 360
         #
-        # theta = math.atan2(ydir,xdir)
-        # self.angular_velocity = self.head_direction - math.degrees(theta)
-        # self.head_direction = math.degrees(theta)
-
-        if (self.head_direction + step_size_turn)>=360:
-            self.head_direction -= 360
-        elif (self.head_direction + step_size_turn) < 0:
-            self.head_direction += 360
-
-        self.head_direction += step_size_turn
-        self.angular_velocity += step_size_turn
-
-        if self.brain.thought_count%25 == 0:
+        # self.head_direction += step_size_turn
+        # self.angular_velocity += step_size_turn
+        #
+        if self.brain.thought_count%1 == 0:
             self.brain.encode_movement(0,self.angular_velocity)
             self.brain.pool_movement()
             self.brain.temporal_location()

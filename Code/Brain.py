@@ -1,5 +1,5 @@
 import numpy as np
-
+import csv
 import htm
 from htm.algorithms import SpatialPooler as SP
 from htm.algorithms import TemporalMemory as TM
@@ -32,12 +32,12 @@ class Brain:
         self.L4_sensory_sp = SP()
         self.L4_sensory_tm = TM()
         self.L4_active_columns = SDR(1)
+        self.L4toL6a_interlayer_sp = SP()
 
         self.L6a_location_sp = SP()
         self.L6a_location_tm = TM()
         self.L6a_active_columns = SDR(1)
-
-        self.interlayer_sp = SP()
+        self.L6atoL4_interlayer_sp = SP()
 
         self.metrics_on = metrics_on
         self.thought_count = 0
@@ -69,7 +69,7 @@ class Brain:
         )
 
         self.linear_speed_enc_param = rdse_encoder_parameters(
-            #region Linear Spped Encoder Parameters
+            #region Linear Speed Encoder Parameters
             active_bits=0,
             category=0,
             radius=0,
@@ -85,7 +85,7 @@ class Brain:
             active_bits=0,
             category=0,
             radius=0,
-            resolution=0.5,
+            resolution=.01,
             seed=0,
             size=500,
             sparsity=0.1
@@ -93,7 +93,6 @@ class Brain:
         )
 
         #Ray Angle and Length Encoders
-
         self.ray_angle_encoder = rdse_encoder(self.angle_enc_param)
         self.ray_length_encoder = rdse_encoder(self.length_enc_param)
         self.ray_encoding_width = self.ray_length_encoder.size + self.ray_angle_encoder.size
@@ -102,13 +101,11 @@ class Brain:
         self.vision_enc_info = Metrics([self.vision_encoding_width], 999999999)
 
         # Turn and Speed Encoders
-
         self.linear_speed_encoder = rdse_encoder(self.linear_speed_enc_param)
         self.angular_velocity_encoder = rdse_encoder(self.ang_velocity_enc_param)
 
         self.movement_encoding_width = self.linear_speed_encoder.size + self.angular_velocity_encoder.size
         self.movement_enc_info = Metrics([self.movement_encoding_width], 999999999)
-
         # endregion
 
         # region Spatial Pooler
@@ -116,7 +113,7 @@ class Brain:
             #region L4_sp Parameters
             inputDimensions=[self.vision_encoding_width],
             columnDimensions=[self.number_of_columns],
-            potentialRadius=self.ray_encoding_width,        #
+            potentialRadius=int(self.ray_encoding_width/2),
             potentialPct=0.85,
             globalInhibition=True,
             localAreaDensity=0.04,
@@ -139,7 +136,7 @@ class Brain:
             #region L6a_sp Parameters
             inputDimensions=[self.movement_encoding_width],
             columnDimensions=[self.number_of_columns],
-            potentialRadius=100,
+            potentialRadius=self.movement_encoding_width,
             potentialPct=0.85,
             globalInhibition=True,
             localAreaDensity=0.04,
@@ -158,11 +155,11 @@ class Brain:
         )
         self.L6a_location_sp_info = Metrics(self.L6a_location_sp.getColumnDimensions(), 999999999)
 
-        self.interlayer_sp = SP(
+        self.L4toL6a_interlayer_sp = SP(
             # region interlayer_sp Parameters
             inputDimensions=[self.number_of_columns*self.layer_depth],
             columnDimensions=[self.number_of_columns],
-            potentialRadius=self.layer_depth,
+            potentialRadius=1000,
             potentialPct=0.85,
             globalInhibition=True,
             localAreaDensity=0.04,
@@ -179,7 +176,31 @@ class Brain:
             wrapAround=False
             # endregion
         )
-        self.interlayer_sp_info = Metrics(self.interlayer_sp.getColumnDimensions(), 999999999)
+        self.L4toL6a_interlayer_sp_info = Metrics(self.L4toL6a_interlayer_sp.getColumnDimensions(), 999999999)
+        # endregion
+
+        self.L6atoL4_interlayer_sp = SP(
+            # region interlayer_sp Parameters
+            inputDimensions=[self.number_of_columns * self.layer_depth],
+            columnDimensions=[self.number_of_columns],
+            potentialRadius=1000,
+            potentialPct=0.85,
+            globalInhibition=True,
+            localAreaDensity=0.04,
+            # numActiveColumnsPerInhArea=0,
+            # stimulusThreshold=0,
+            synPermInactiveDec=0.006,
+            synPermActiveInc=0.04,
+            synPermConnected=0.14,
+            # minPctOverlapDutyCycle=0,
+            # dutyCyclePeriod=0,
+            boostStrength=3,
+            # seed=0,
+            # spVerbosity=0,
+            wrapAround=False
+            # endregion
+        )
+        self.L6atoL4_interlayer_sp_info = Metrics(self.L6atoL4_interlayer_sp.getColumnDimensions(), 999999999)
         # endregion
 
         # region Temporal Memory
@@ -189,7 +210,7 @@ class Brain:
             cellsPerColumn=self.layer_depth,
             activationThreshold=15,
             initialPermanence=0.21,
-            connectedPermanence=self.L4_sensory_sp.getSynPermConnected(),  #0.5
+            connectedPermanence=self.L4_sensory_sp.getSynPermConnected(),
             #minThreshold=10,
             maxNewSynapseCount=16,
             permanenceIncrement=0.1,
@@ -210,7 +231,7 @@ class Brain:
             cellsPerColumn=self.layer_depth,
             activationThreshold=15,
             initialPermanence=0.21,
-            connectedPermanence=self.L4_sensory_sp.getSynPermConnected(),
+            connectedPermanence=self.L6a_location_sp.getSynPermConnected(),
             # minThreshold=10,
             maxNewSynapseCount=16,
             permanenceIncrement=0.1,
@@ -256,7 +277,6 @@ class Brain:
 
 
     def encode_movement(self, linear_move, angular_turn):
-
         linear_move_SDR = self.linear_speed_encoder.encode(linear_move)
         angular_move_SDR = self.angular_velocity_encoder.encode(angular_turn)
 
@@ -270,7 +290,6 @@ class Brain:
 
 
     def pool_senses(self):
-
         self.L4_active_columns = SDR(self.L4_sensory_sp.getColumnDimensions())
         self.L4_sensory_sp.compute(self.vision_SDR, True, self.L4_active_columns)
 
@@ -281,7 +300,6 @@ class Brain:
 
 
     def pool_movement(self):
-
         self.L6a_active_columns = SDR(self.L6a_location_sp.getColumnDimensions())
         self.L6a_location_sp.compute(self.movement_SDR, True, self.L6a_active_columns)
 
@@ -291,20 +309,20 @@ class Brain:
         return
 
     def pool_loc2sense(self):
-        self.L4_active_columns = SDR(self.interlayer_sp.getColumnDimensions())
-        self.interlayer_sp.compute(self.L6a_location_tm.getActiveCells(), True, self.L4_active_columns)
+        self.L4_active_columns = SDR(self.L6atoL4_interlayer_sp.getColumnDimensions())
+        self.L6atoL4_interlayer_sp.compute(self.L6a_location_tm.getActiveCells(), True, self.L4_active_columns)
 
         if self.metrics_on:
-            self.interlayer_sp_info.addData(self.L4_active_columns)
+            self.L6atoL4_interlayer_sp_info.addData(self.L4_active_columns)
 
         return
 
     def pool_sense2loc(self):
-        self.L6a_active_columns = SDR(self.interlayer_sp.getColumnDimensions())
-        self.interlayer_sp.compute(self.L4_sensory_tm.getActiveCells(), True, self.L6a_active_columns)
+        self.L6a_active_columns = SDR(self.L4toL6a_interlayer_sp.getColumnDimensions())
+        self.L4toL6a_interlayer_sp.compute(self.L4_sensory_tm.getActiveCells(), True, self.L6a_active_columns)
 
         if self.metrics_on:
-            self.interlayer_sp_info.addData(self.L6a_active_columns)
+            self.L4toL6a_interlayer_sp_info.addData(self.L6a_active_columns)
 
         return
 
@@ -334,7 +352,7 @@ class Brain:
 
         return
 
-    def track_most_active_neuron(self,animal, tm):
+    def track_most_active_neuron(self, animal, tm):
         self.cells_active = tm.getActiveCells().sparse
 
         for i in range(len(self.most_active_cells)):
@@ -368,3 +386,6 @@ class Brain:
         self.cell_fire_location.clear()
 
         return
+
+    def csv_active_cell_location(self, animal, tm):
+        pass
