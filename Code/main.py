@@ -48,7 +48,7 @@ writer.writerow(header)
 noisex = PerlinNoise()
 noisey = PerlinNoise()
 count = 0
-perlin = [i*0.003 for i in range(75000)]
+perlin = [i*0.003 for i in range(250000)]
 xdir = [noisex(i) for i in perlin]
 ydir = [noisey(i) for i in perlin]
 # endregion
@@ -75,7 +75,7 @@ def draw():
     pygame.display.update()
 
 # to do while running pygame
-while count<74999:
+while count<249999:
     # Animal actions, i.e. look and move.
     # current inputs, mouse moves forward
 
@@ -125,6 +125,7 @@ while count<74999:
     #if count%1 == 0:
     mouse.think()
 
+
     if track:
         mouse.brain.track_most_active_neuron(mouse, mouse.brain.L6a_location_tm)
 
@@ -144,10 +145,8 @@ while count<74999:
             writer.writerow(data)
     count+=1
 
-mouse.brain.L6atoL4_interlayer_sp.saveToFile('locISP', 'BINARY')
 mouse.brain.L6a_location_tm.saveToFile('locTM', 'BINARY')
 mouse.brain.L6a_location_sp.saveToFile('locTM', 'BINARY')
-mouse.brain.L4toL6a_interlayer_sp.saveToFile('senISP', 'BINARY')
 mouse.brain.L4_sensory_tm.saveToFile('senTM', 'BINARY')
 mouse.brain.L4_sensory_sp.saveToFile('senSP', 'BINARY')
 

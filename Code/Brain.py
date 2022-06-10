@@ -16,7 +16,7 @@ class Brain:
      (i.e. neuron interconnections, minicolumns, temporal memory, converting SDR input into motor outputs, etc)
     """
     def __init__(self, eye, metrics_on):
-        self.number_of_columns = 512
+        self.number_of_columns = 256
         self.layer_depth = 32
 
         self.encoded_vision = []
@@ -32,12 +32,10 @@ class Brain:
         self.L4_sensory_sp = SP()
         self.L4_sensory_tm = TM()
         self.L4_active_columns = SDR(1)
-        self.L4toL6a_interlayer_sp = SP()
 
         self.L6a_location_sp = SP()
         self.L6a_location_tm = TM()
         self.L6a_active_columns = SDR(1)
-        self.L6atoL4_interlayer_sp = SP()
 
         self.metrics_on = metrics_on
         self.thought_count = 0
@@ -85,7 +83,7 @@ class Brain:
             active_bits=0,
             category=0,
             radius=0,
-            resolution=.01,
+            resolution=.1,
             seed=0,
             size=500,
             sparsity=0.1
@@ -155,53 +153,6 @@ class Brain:
         )
         self.L6a_location_sp_info = Metrics(self.L6a_location_sp.getColumnDimensions(), 999999999)
 
-        self.L4toL6a_interlayer_sp = SP(
-            # region interlayer_sp Parameters
-            inputDimensions=[self.number_of_columns*self.layer_depth],
-            columnDimensions=[self.number_of_columns],
-            potentialRadius=1000,
-            potentialPct=0.85,
-            globalInhibition=True,
-            localAreaDensity=0.04,
-            # numActiveColumnsPerInhArea=0,
-            # stimulusThreshold=0,
-            synPermInactiveDec=0.006,
-            synPermActiveInc=0.04,
-            synPermConnected=0.14,
-            # minPctOverlapDutyCycle=0,
-            # dutyCyclePeriod=0,
-            boostStrength=3,
-            # seed=0,
-            # spVerbosity=0,
-            wrapAround=False
-            # endregion
-        )
-        self.L4toL6a_interlayer_sp_info = Metrics(self.L4toL6a_interlayer_sp.getColumnDimensions(), 999999999)
-        # endregion
-
-        self.L6atoL4_interlayer_sp = SP(
-            # region interlayer_sp Parameters
-            inputDimensions=[self.number_of_columns * self.layer_depth],
-            columnDimensions=[self.number_of_columns],
-            potentialRadius=1000,
-            potentialPct=0.85,
-            globalInhibition=True,
-            localAreaDensity=0.04,
-            # numActiveColumnsPerInhArea=0,
-            # stimulusThreshold=0,
-            synPermInactiveDec=0.006,
-            synPermActiveInc=0.04,
-            synPermConnected=0.14,
-            # minPctOverlapDutyCycle=0,
-            # dutyCyclePeriod=0,
-            boostStrength=3,
-            # seed=0,
-            # spVerbosity=0,
-            wrapAround=False
-            # endregion
-        )
-        self.L6atoL4_interlayer_sp_info = Metrics(self.L6atoL4_interlayer_sp.getColumnDimensions(), 999999999)
-        # endregion
 
         # region Temporal Memory
         self.L4_sensory_tm = TM(
@@ -220,7 +171,7 @@ class Brain:
             maxSegmentsPerCell=64,
             maxSynapsesPerSegment=64,
             #checkInputs=0,
-            #externalPredictiveInputs=0
+            externalPredictiveInputs=(self.number_of_columns*self.layer_depth)
             #endregion
         )
         self.L4_sensory_tm_info = Metrics([self.L4_sensory_tm.numberOfCells()], 999999999)
@@ -241,7 +192,7 @@ class Brain:
             maxSegmentsPerCell=64,
             maxSynapsesPerSegment=64,
             # checkInputs=0,
-            # externalPredictiveInputs=0
+            externalPredictiveInputs=(self.number_of_columns*self.layer_depth)
             # endregion
         )
         self.L6a_location_tm_info = Metrics([self.L6a_location_tm.numberOfCells()], 999999999)
@@ -308,37 +259,38 @@ class Brain:
 
         return
 
-    def pool_loc2sense(self):
-        self.L4_active_columns = SDR(self.L6atoL4_interlayer_sp.getColumnDimensions())
-        self.L6atoL4_interlayer_sp.compute(self.L6a_location_tm.getActiveCells(), True, self.L4_active_columns)
-
-        if self.metrics_on:
-            self.L6atoL4_interlayer_sp_info.addData(self.L4_active_columns)
-
-        return
-
-    def pool_sense2loc(self):
-        self.L6a_active_columns = SDR(self.L4toL6a_interlayer_sp.getColumnDimensions())
-        self.L4toL6a_interlayer_sp.compute(self.L4_sensory_tm.getActiveCells(), True, self.L6a_active_columns)
-
-        if self.metrics_on:
-            self.L4toL6a_interlayer_sp_info.addData(self.L6a_active_columns)
-
-        return
 
     def temporal_senses(self):
+        self.L4_sensory_tm.activateDendrites(learn=True)
+        self.L4_sensory_tm.activateCells(self.L4_active_columns, learn=True)
+        if self.metrics_on:
+            self.L4_sensory_tm_info.addData(self.L4_sensory_tm.getActiveCells().flatten())
 
-        self.L4_sensory_tm.compute(self.L4_active_columns, learn=True)
+        return
 
+    def temporal_senses_motion_context(self):
+        self.L4_sensory_tm.activateDendrites(learn=True,
+                                               externalPredictiveInputsActive=self.L6a_location_tm.getActiveCells(),
+                                               externalPredictiveInputsWinners=self.L6a_location_tm.getWinnerCells())
+        self.L4_sensory_tm.activateCells(self.L4_active_columns, learn=True)
         if self.metrics_on:
             self.L4_sensory_tm_info.addData(self.L4_sensory_tm.getActiveCells().flatten())
 
         return
 
     def temporal_location(self):
+        self.L6a_location_tm.activateDendrites(learn=True)
+        self.L6a_location_tm.activateCells(self.L6a_active_columns, learn=True)
+        if self.metrics_on:
+            self.L6a_location_tm_info.addData(self.L6a_location_tm.getActiveCells().flatten())
 
-        self.L6a_location_tm.compute(self.L6a_active_columns, learn=True)
+        return
 
+    def temporal_location_sensory_context(self):
+        self.L6a_location_tm.activateDendrites(learn=True,
+                                               externalPredictiveInputsActive=self.L4_sensory_tm.getActiveCells(),
+                                               externalPredictiveInputsWinners = self.L4_sensory_tm.getWinnerCells())
+        self.L6a_location_tm.activateCells(self.L6a_active_columns, learn=True,)
         if self.metrics_on:
             self.L6a_location_tm_info.addData(self.L6a_location_tm.getActiveCells().flatten())
 
