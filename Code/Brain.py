@@ -269,9 +269,12 @@ class Brain:
         return
 
     def temporal_senses_motion_context(self):
-        self.L4_sensory_tm.activateDendrites(learn=True,
-                                               externalPredictiveInputsActive=self.L6a_location_tm.getActiveCells(),
-                                               externalPredictiveInputsWinners=self.L6a_location_tm.getWinnerCells())
+        self.L4_sensory_tm.activateDendrites(
+            learn=True,
+            externalPredictiveInputsActive=self.L6a_location_tm.getActiveCells(),
+            externalPredictiveInputsWinners=self.L6a_location_tm.getWinnerCells()
+        )
+
         self.L4_sensory_tm.activateCells(self.L4_active_columns, learn=True)
         if self.metrics_on:
             self.L4_sensory_tm_info.addData(self.L4_sensory_tm.getActiveCells().flatten())
@@ -287,9 +290,11 @@ class Brain:
         return
 
     def temporal_location_sensory_context(self):
-        self.L6a_location_tm.activateDendrites(learn=True,
-                                               externalPredictiveInputsActive=self.L4_sensory_tm.getActiveCells(),
-                                               externalPredictiveInputsWinners = self.L4_sensory_tm.getWinnerCells())
+        self.L6a_location_tm.activateDendrites(
+            learn=True,
+            externalPredictiveInputsActive=self.L4_sensory_tm.getActiveCells(),
+            externalPredictiveInputsWinners = self.L4_sensory_tm.getWinnerCells()
+        )
         self.L6a_location_tm.activateCells(self.L6a_active_columns, learn=True,)
         if self.metrics_on:
             self.L6a_location_tm_info.addData(self.L6a_location_tm.getActiveCells().flatten())
@@ -300,7 +305,7 @@ class Brain:
     def find_most_active_neuron(self, tm_info):
         self.cells_freq = tm_info.activationFrequency.activationFrequency
         #index = np.argmax(self.cells_freq)
-        self.most_active_cells = np.argpartition(self.cells_freq,-5)[-5:]
+        self.most_active_cells = np.argpartition(self.cells_freq,-1)[-1:]
 
         return
 
@@ -338,6 +343,3 @@ class Brain:
         self.cell_fire_location.clear()
 
         return
-
-    def csv_active_cell_location(self, animal, tm):
-        pass
