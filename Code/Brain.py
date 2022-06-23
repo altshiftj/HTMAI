@@ -32,10 +32,12 @@ class Brain:
         self.L4_sensory_sp = SP()
         self.L4_sensory_tm = TM()
         self.L4_active_columns = SDR(1)
+        self.L4_predictive_cells = SDR(1)
 
         self.L6a_location_sp = SP()
         self.L6a_location_tm = TM()
         self.L6a_active_columns = SDR(1)
+        self.L6a_predictive_cells = SDR(1)
 
         self.metrics_on = metrics_on
         self.thought_count = 0
@@ -49,7 +51,7 @@ class Brain:
             radius=3*eye.field_of_view/(2*eye.number_of_rays),
             resolution=0,
             seed=0,
-            size=500,
+            size=1000,
             sparsity=0.1
             #endregion
         )
@@ -61,7 +63,7 @@ class Brain:
             radius=25,
             resolution=0,
             seed=0,
-            size=750,
+            size=1500,
             sparsity=0.1
             #endregion
         )
@@ -73,7 +75,7 @@ class Brain:
             radius=0,
             resolution=1,
             seed=0,
-            size=500,
+            size=1000,
             sparsity=0.1
             #endregion
         )
@@ -83,9 +85,9 @@ class Brain:
             active_bits=0,
             category=0,
             radius=0,
-            resolution=.1,
+            resolution=.01,
             seed=0,
-            size=500,
+            size=1000,
             sparsity=0.1
             #endregion
         )
@@ -265,7 +267,7 @@ class Brain:
         self.L4_sensory_tm.activateCells(self.L4_active_columns, learn=True)
         if self.metrics_on:
             self.L4_sensory_tm_info.addData(self.L4_sensory_tm.getActiveCells().flatten())
-
+        a = self.L4_sensory_tm.getActiveCells()
         return
 
     def temporal_senses_motion_context(self):
@@ -274,11 +276,11 @@ class Brain:
             externalPredictiveInputsActive=self.L6a_location_tm.getActiveCells(),
             externalPredictiveInputsWinners=self.L6a_location_tm.getWinnerCells()
         )
-
+        self.L4_predictive_cells = self.L4_sensory_tm.getPredictiveCells()
         self.L4_sensory_tm.activateCells(self.L4_active_columns, learn=True)
         if self.metrics_on:
             self.L4_sensory_tm_info.addData(self.L4_sensory_tm.getActiveCells().flatten())
-
+        a = self.L4_sensory_tm.getActiveCells()
         return
 
     def temporal_location(self):
@@ -286,7 +288,7 @@ class Brain:
         self.L6a_location_tm.activateCells(self.L6a_active_columns, learn=True)
         if self.metrics_on:
             self.L6a_location_tm_info.addData(self.L6a_location_tm.getActiveCells().flatten())
-
+        a = self.L6a_location_tm.getActiveCells()
         return
 
     def temporal_location_sensory_context(self):
@@ -295,10 +297,11 @@ class Brain:
             externalPredictiveInputsActive=self.L4_sensory_tm.getActiveCells(),
             externalPredictiveInputsWinners = self.L4_sensory_tm.getWinnerCells()
         )
+        self.L6a_predictive_cells = self.L6a_location_tm.getPredictiveCells()
         self.L6a_location_tm.activateCells(self.L6a_active_columns, learn=True,)
         if self.metrics_on:
             self.L6a_location_tm_info.addData(self.L6a_location_tm.getActiveCells().flatten())
-
+        a = self.L6a_location_tm.getActiveCells()
         return
 
 

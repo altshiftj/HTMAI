@@ -18,8 +18,8 @@ Purpose of main is to manage the relationship between class Box and Animal, as w
 """
 #instantiate Box
 box = Box(800,600)
-# box.add_object(100,75,1100,100)
-# box.add_object(150,175,550,200)
+#box.add_object(100,75,1100,100)
+#box.add_object(150,175,550,200)
 # box.add_object(650,175,1050,200)
 #
 # box.add_object(100,400,200,500)
@@ -39,10 +39,10 @@ display = pygame.Surface(WINDOW_SIZE)
 running = True
 
 # region Autoturn
-noisex = PerlinNoise()
-noisey = PerlinNoise()
+noisex = PerlinNoise(octaves=2)
+noisey = PerlinNoise(octaves=3)
 count = 0
-perlin = [i*0.003 for i in range(1000)]
+perlin = [i*0.001 for i in range(20000)]
 xdir = [noisex(i) for i in perlin]
 ydir = [noisey(i) for i in perlin]
 # endregion
@@ -70,7 +70,7 @@ def draw():
 
 
 # to do while running pygame
-while count<9999999:
+while count<1999999:
     # Animal actions, i.e. look and move.
     # current inputs, mouse moves forward
 
@@ -111,7 +111,8 @@ while count<9999999:
     mouse.turn(xdir[count], ydir[count])
     mouse.move(2,box,'forward')
 
-    mouse.think()
+    if count%10==0:
+        mouse.think()
 
     count+=1
 
