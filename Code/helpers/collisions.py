@@ -17,9 +17,13 @@ def ray_collision(ray, box):
     for wall in box.walls:
         intersect_point = find_intersect(ray, wall)
         if intersect_point is not None:
-            ray.length = dist(ray.x1, ray.y1, intersect_point[0], intersect_point[1])
+            ray.length = int(dist(ray.x1, ray.y1, intersect_point[0], intersect_point[1]))
+            ray.color = wall.color
+            ray.color_num - wall.color_num
             if (ray.length < closest):
-                closest = ray.length
+                closest = int(ray.length)
+                ray.color = wall.color
+                ray.color_num = wall.color_num
     ray.length = min(closest, ray.max_length)
     ray.x2 = ray.x1 + ray.length * math.cos(ray.alloc_angle)
     ray.y2 = ray.y1 + ray.length * math.sin(ray.alloc_angle)

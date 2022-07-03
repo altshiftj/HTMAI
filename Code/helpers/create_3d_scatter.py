@@ -1,54 +1,46 @@
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider, Button
 from pylab import *
 import pandas
 
+layer = 'L4'
+cell_type = 'Active'
+column = 11
+cell = column * 32
+df = pandas.read_csv(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}\column{column}_cell{cell}.csv')
+
+x = df['x'].values
+y = df['y'].values
+z = df['head direction'].values
+
 fig = plt.figure()
 
+fig.suptitle(f'Cell {cell} Activation')
+ax = fig.add_subplot(111, projection='3d')
 
-for i in range(256*32):
-    j=i*32
-    df = pandas.read_csv(f'C:\Environments\HTMAI\Code\Output\L6a_Active\column{i}_cell{j}.csv')
+colmap = cm.ScalarMappable(cmap=cm.plasma)
+colmap.set_array(z)
 
-    if not df.empty:
-        for k in range(4):
+img = ax.scatter(x, y, z, c=cm.plasma(z / max(z)), marker='o', s=6)
 
-            fig.suptitle(f'Cell {j} Activation')
-            ax = fig.add_subplot(111, projection='3d')
+axz = plt.axes([0.25, 0.15, 0.65, 0.03])
 
-            x = df['x'].values
-            y = df['y'].values
-            z = df['head direction'].values
+cb = fig.colorbar(colmap)
+cb.set_label('Head Direction (\N{DEGREE SIGN})')
 
-            colmap = cm.ScalarMappable(cmap=cm.plasma)
-            colmap.set_array(z)
+ax.set_xlabel('X Position')
+ax.set_ylabel('Y Position')
+ax.set_zlabel('Head Direction (\N{DEGREE SIGN})')
 
-            img = ax.scatter(x, y, z, c=cm.plasma(z / max(z)), marker='o', s=6)
+zslide = Slider(axz, 'Head Direction', 0, 360, 180)
 
-            cb = fig.colorbar(colmap)
-            cb.set_label('Head Direction (\N{DEGREE SIGN})')
+def update(val):
+    zval = zslide.val
+    ax.set_zlim3d(zval-.5,zval+.5)
 
-            ax.set_xlabel('X Position')
-            ax.set_ylabel('Y Position')
-            ax.set_zlabel('Head Direction (\N{DEGREE SIGN})')
 
-            match k:
-                # case 0:
-                #     plt.savefig(f'C:\Environments\HTMAI\Code\Output\L4_Plots\\3D_Cell_{j}.png', dpi=250)
-                #     plt.clf()
+zslide.on_changed(update)
 
-                case 1:
-                    ax.view_init(-90, -90)  # xy
-                    plt.savefig(f'C:\Environments\HTMAI\Code\Output\L6a_Active_Plots\XY_Cell_{j}.png', dpi=250)
-                    plt.clf()
-
-                # case 2:
-                #     ax.view_init(0, -90)  # xz
-                #     plt.savefig(f'C:\Environments\HTMAI\Code\Output\L4_Plots\XZ_Cell_{j}.png', dpi=250)
-                #     plt.clf()
-                #
-                # case 3:
-                #     ax.view_init(0, 0)  # yz
-                #     plt.savefig(f'C:\Environments\HTMAI\Code\Output\L4_Plots\YZ_Cell_{j}.png', dpi=250)
-                #     plt.clf()
+plt.show()

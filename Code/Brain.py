@@ -29,86 +29,124 @@ class Brain:
         self.angular_velocity_encoder = enc.RDSE()
         self.movement_SDR = htm.SDR(1)
 
+        self.L23_object_sp = SP()
+        self.L23_object_tm = TM()
+        self.L23_active_columns = SDR(1)
+
         self.L4_sensory_sp = SP()
         self.L4_sensory_tm = TM()
         self.L4_active_columns = SDR(1)
-        self.L4_predictive_cells = SDR(1)
 
         self.L6a_location_sp = SP()
         self.L6a_location_tm = TM()
         self.L6a_active_columns = SDR(1)
-        self.L6a_predictive_cells = SDR(1)
 
         self.metrics_on = metrics_on
         self.thought_count = 0
 
         # region Encoders
         # Ray Angle and Length encoding parameters
-        self.angle_enc_param = rdse_encoder_parameters(
+        self.angle_enc_param = scalar_encoder_parameters(
             #region Angle Encoder Parameters
             active_bits=0,
             category=0,
-            radius=3*eye.field_of_view/(2*eye.number_of_rays),
+            clip_input=0,
+            maximum=360,
+            minimum=0,
+            periodic=1,
+            radius=0,
             resolution=0,
-            seed=0,
-            size=1000,
+            size=100,
             sparsity=0.1
             #endregion
         )
 
-        self.length_enc_param = rdse_encoder_parameters(
-            #region Length Encoder Parameters
+        self.color_enc_param = scalar_encoder_parameters(
+            #region Color Encoder Parameters
             active_bits=0,
             category=0,
-            radius=25,
+            clip_input=0,
+            maximum=5,
+            minimum=0,
+            periodic=0,
+            radius=0,
             resolution=0,
-            seed=0,
-            size=1500,
+            size=50,
             sparsity=0.1
             #endregion
         )
 
-        self.linear_speed_enc_param = rdse_encoder_parameters(
+        self.linear_speed_enc_param = scalar_encoder_parameters(
             #region Linear Speed Encoder Parameters
             active_bits=0,
             category=0,
+            clip_input=0,
+            maximum=20,
+            minimum=0,
+            periodic=0,
             radius=0,
-            resolution=1,
-            seed=0,
-            size=1000,
+            resolution=0,
+            size=50,
             sparsity=0.1
             #endregion
         )
 
-        self.ang_velocity_enc_param = rdse_encoder_parameters(
+        self.ang_velocity_enc_param = scalar_encoder_parameters(
             #region Anglular Velocity Encoder Parameters
             active_bits=0,
             category=0,
+            clip_input=0,
+            maximum=360,
+            minimum=-360,
+            periodic=0,
             radius=0,
-            resolution=.01,
-            seed=0,
-            size=1000,
+            resolution=0,
+            size=100,
             sparsity=0.1
             #endregion
         )
 
         #Ray Angle and Length Encoders
-        self.ray_angle_encoder = rdse_encoder(self.angle_enc_param)
-        self.ray_length_encoder = rdse_encoder(self.length_enc_param)
+        self.ray_angle_encoder = scalar_encoder(self.angle_enc_param)
+        self.ray_length_encoder = scalar_encoder(self.color_enc_param)
         self.ray_encoding_width = self.ray_length_encoder.size + self.ray_angle_encoder.size
 
         self.vision_encoding_width = self.ray_encoding_width * len(eye.vision)
         self.vision_enc_info = Metrics([self.vision_encoding_width], 999999999)
 
         # Turn and Speed Encoders
-        self.linear_speed_encoder = rdse_encoder(self.linear_speed_enc_param)
-        self.angular_velocity_encoder = rdse_encoder(self.ang_velocity_enc_param)
+        self.linear_speed_encoder = scalar_encoder(self.linear_speed_enc_param)
+        self.angular_velocity_encoder = scalar_encoder(self.ang_velocity_enc_param)
 
         self.movement_encoding_width = self.linear_speed_encoder.size + self.angular_velocity_encoder.size
         self.movement_enc_info = Metrics([self.movement_encoding_width], 999999999)
         # endregion
 
         # region Spatial Pooler
+        self.L23_object_sp = SP(
+            # region L23_sp Parameters
+            inputDimensions=[self.number_of_columns*self.layer_depth],
+            columnDimensions=[self.number_of_columns],
+            potentialRadius=self.layer_depth,
+            potentialPct=0.85,
+            globalInhibition=True,
+            localAreaDensity=0.04,
+            # numActiveColumnsPerInhArea=0,
+            # stimulusThreshold=0,
+            synPermInactiveDec=0.006,
+            synPermActiveInc=0.04,
+            synPermConnected=0.14,
+            # minPctOverlapDutyCycle=0,
+            # dutyCyclePeriod=0,
+            boostStrength=3,
+            # seed=0,
+            # spVerbosity=0,
+            wrapAround=False
+            # endregion
+        )
+        self.L23_sp_info = Metrics(self.L23_object_sp.getColumnDimensions(), 999999999)
+        
+        
         self.L4_sensory_sp = SP(
             #region L4_sp Parameters
             inputDimensions=[self.vision_encoding_width],
@@ -148,7 +186,7 @@ class Brain:
             # minPctOverlapDutyCycle=0,
             # dutyCyclePeriod=0,
             boostStrength=3,
-            # seed=0,
+            #seed=0,
             # spVerbosity=0,
             wrapAround=False
             #endregion
@@ -157,6 +195,28 @@ class Brain:
 
 
         # region Temporal Memory
+        self.L23_object_tm = TM(
+            # region L23_tm Parameters
+            columnDimensions=[self.number_of_columns],
+            cellsPerColumn=self.layer_depth,
+            activationThreshold=15,
+            initialPermanence=0.21,
+            connectedPermanence=0.14,
+            # minThreshold=10,
+            maxNewSynapseCount=32,
+            permanenceIncrement=0.1,
+            permanenceDecrement=0.1,
+            predictedSegmentDecrement=0.01,
+            # seed=0,
+            maxSegmentsPerCell=32,
+            maxSynapsesPerSegment=32,
+            # checkInputs=0,
+            externalPredictiveInputs=(self.number_of_columns * self.layer_depth)
+            # endregion
+        )
+        self.L23_object_tm_info = Metrics([self.L23_object_tm.numberOfCells()], 999999999)
+        
+        
         self.L4_sensory_tm = TM(
             #region L4_tm Parameters
             columnDimensions=[self.number_of_columns],
@@ -165,13 +225,13 @@ class Brain:
             initialPermanence=0.21,
             connectedPermanence=self.L4_sensory_sp.getSynPermConnected(),
             #minThreshold=10,
-            maxNewSynapseCount=16,
+            maxNewSynapseCount=32,
             permanenceIncrement=0.1,
             permanenceDecrement=0.1,
             predictedSegmentDecrement=0.01,
             #seed=0,
-            maxSegmentsPerCell=64,
-            maxSynapsesPerSegment=64,
+            maxSegmentsPerCell=32,
+            maxSynapsesPerSegment=32,
             #checkInputs=0,
             externalPredictiveInputs=(self.number_of_columns*self.layer_depth)
             #endregion
@@ -186,13 +246,13 @@ class Brain:
             initialPermanence=0.21,
             connectedPermanence=self.L6a_location_sp.getSynPermConnected(),
             # minThreshold=10,
-            maxNewSynapseCount=16,
+            maxNewSynapseCount=32,
             permanenceIncrement=0.1,
             permanenceDecrement=0.1,
             predictedSegmentDecrement=0.01,
-            # seed=0,
-            maxSegmentsPerCell=64,
-            maxSynapsesPerSegment=64,
+            #seed=0,
+            maxSegmentsPerCell=32,
+            maxSynapsesPerSegment=32,
             # checkInputs=0,
             externalPredictiveInputs=(self.number_of_columns*self.layer_depth)
             # endregion
@@ -213,7 +273,7 @@ class Brain:
 
         self.encoded_vision.clear()
         for ray in eye.vision:
-            ray_length_SDR = self.ray_length_encoder.encode(int(ray.length))
+            ray_length_SDR = self.ray_length_encoder.encode(ray.color_num)
             ray_angle_SDR = self.ray_angle_encoder.encode(int(ray.degree_ego_angle))
 
             rdse_ray_SDR = htm.SDR(self.ray_encoding_width)
@@ -241,6 +301,14 @@ class Brain:
 
         return
 
+    def pool_object(self):
+        self.L23_active_columns = SDR(self.L23_object_sp.getColumnDimensions())
+        self.L23_object_sp.compute(self.L4_sensory_tm.getActiveCells(), True, self.L23_active_columns)
+
+        if self.metrics_on:
+            self.L23_sp_info.addData(self.L23_active_columns)
+
+        return
 
     def pool_senses(self):
         self.L4_active_columns = SDR(self.L4_sensory_sp.getColumnDimensions())
@@ -262,13 +330,27 @@ class Brain:
         return
 
 
+    def temporal_object(self):
+        self.L23_object_tm.activateDendrites(
+            learn=True,
+            externalPredictiveInputsActive = self.L4_sensory_tm.getActiveCells(),
+            externalPredictiveInputsWinners = self.L4_sensory_tm.getWinnerCells()
+        )
+        self.L23_object_tm.activateCells(self.L4_active_columns, learn=True)
+        if self.metrics_on:
+            self.L23_object_tm_info.addData(self.L23_object_tm.getActiveCells().flatten())
+        return
+
+
     def temporal_senses(self):
-        self.L4_sensory_tm.activateDendrites(learn=True)
+        self.L4_sensory_tm.activateDendrites(
+            learn=True
+        )
         self.L4_sensory_tm.activateCells(self.L4_active_columns, learn=True)
         if self.metrics_on:
             self.L4_sensory_tm_info.addData(self.L4_sensory_tm.getActiveCells().flatten())
-        a = self.L4_sensory_tm.getActiveCells()
         return
+
 
     def temporal_senses_motion_context(self):
         self.L4_sensory_tm.activateDendrites(
@@ -280,7 +362,6 @@ class Brain:
         self.L4_sensory_tm.activateCells(self.L4_active_columns, learn=True)
         if self.metrics_on:
             self.L4_sensory_tm_info.addData(self.L4_sensory_tm.getActiveCells().flatten())
-        a = self.L4_sensory_tm.getActiveCells()
         return
 
     def temporal_location(self):
@@ -288,7 +369,6 @@ class Brain:
         self.L6a_location_tm.activateCells(self.L6a_active_columns, learn=True)
         if self.metrics_on:
             self.L6a_location_tm_info.addData(self.L6a_location_tm.getActiveCells().flatten())
-        a = self.L6a_location_tm.getActiveCells()
         return
 
     def temporal_location_sensory_context(self):
@@ -301,7 +381,6 @@ class Brain:
         self.L6a_location_tm.activateCells(self.L6a_active_columns, learn=True,)
         if self.metrics_on:
             self.L6a_location_tm_info.addData(self.L6a_location_tm.getActiveCells().flatten())
-        a = self.L6a_location_tm.getActiveCells()
         return
 
 
@@ -345,4 +424,15 @@ class Brain:
     def clear_cell_fire_location(self):
         self.cell_fire_location.clear()
 
+        return
+
+    def contextual_memory(self, tm_from, tm_to, active_columns_to, metrics_to):
+        tm_to.activateDendrites(
+            learn=True,
+            externalPredictiveInputsActive=tm_from.getActiveCells(),
+            externalPredictiveInputsWinners = tm_from.getWinnerCells()
+        )
+        tm_to.activateCells(active_columns_to, learn=True,)
+        if self.metrics_on:
+            metrics_to.addData(tm_to.getActiveCells().flatten())
         return

@@ -28,7 +28,7 @@ box = Box(800,600)
 # box.add_object(575,375,725,450)
 
 #instantiate Animal
-mouse = Animal(300,200,10,0,270)
+mouse = Animal(300,200,10,0,270,10)
 track = False
 
 #instantiate pygame environment
@@ -42,7 +42,7 @@ running = True
 noisex = PerlinNoise(octaves=2)
 noisey = PerlinNoise(octaves=3)
 count = 0
-perlin = [i*0.001 for i in range(20000)]
+perlin = [i*0.001 for i in range(50000)]
 xdir = [noisex(i) for i in perlin]
 ydir = [noisey(i) for i in perlin]
 # endregion
@@ -70,7 +70,7 @@ def draw():
 
 
 # to do while running pygame
-while count<1999999:
+while count<49999:
     # Animal actions, i.e. look and move.
     # current inputs, mouse moves forward
 
@@ -120,8 +120,3 @@ mouse.brain.L6a_location_tm.saveToFile('locTM', 'BINARY')
 mouse.brain.L6a_location_sp.saveToFile('locSP', 'BINARY')
 mouse.brain.L4_sensory_tm.saveToFile('senTM', 'BINARY')
 mouse.brain.L4_sensory_sp.saveToFile('senSP', 'BINARY')
-
-
-
-
-

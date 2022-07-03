@@ -34,6 +34,7 @@ class Ray:
         self.y2 = self.y1 + self.length * math.sin(self.alloc_angle)
 
         self.color = color
+        self.color_num = 0
 
 
     def update(self, x, y, alloc_angle, box):
@@ -50,8 +51,6 @@ class Ray:
         ray_collision(self, box)
 
         return
-
-
 
 
     def draw(self, display):

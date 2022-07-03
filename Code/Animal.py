@@ -16,7 +16,7 @@ class Animal:
     head_direction - direction of movement and center of Animal vision (degrees)
     field_of_view - angular width of Animal view
     """
-    def __init__(self, x, y, size, head_direction, field_of_view, color='white'):
+    def __init__(self, x, y, size, head_direction, field_of_view, num_of_rays, color='white'):
         self.x = x
         self.y = y
         self.linear_speed = 0
@@ -27,7 +27,7 @@ class Animal:
         self.head_direction = head_direction
         self.field_of_view = field_of_view
 
-        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, 15)
+        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, num_of_rays)
         self.brain = Brain(self.eye, metrics_on=True)
 
         self.color = color
@@ -65,7 +65,10 @@ class Animal:
 
         self.brain.temporal_location_sensory_context()
 
-        if self.brain.thought_count > 125000:
+        self.brain.pool_object()
+        self.brain.temporal_object()
+
+        if self.brain.thought_count > 2500:
             write_activecell_to_csv(self.brain.L6a_location_tm,
                                     'L6a_active',
                                     self.brain.thought_count,
@@ -75,15 +78,15 @@ class Animal:
                                     self.linear_speed,
                                     self.angular_velocity)
 
-            write_predcell_to_csv(self.brain.L6a_location_tm,
-                                  self.brain.L6a_predictive_cells,
-                                  'L6a_predictive',
-                                  self.brain.thought_count,
-                                  int(self.x),
-                                  int(self.y),
-                                  int(self.head_direction),
-                                  self.linear_speed,
-                                  self.angular_velocity)
+            # write_predcell_to_csv(self.brain.L6a_location_tm,
+            #                       self.brain.L6a_predictive_cells,
+            #                       'L6a_predictive',
+            #                       self.brain.thought_count,
+            #                       int(self.x),
+            #                       int(self.y),
+            #                       int(self.head_direction),
+            #                       self.linear_speed,
+            #                       self.angular_velocity)
 
             # write_winnercell_to_csv(self.brain.L6a_location_tm,
             #                         'L6a_winner',
@@ -102,14 +105,14 @@ class Animal:
                                     int(self.head_direction),
                                     '-','-')
 
-            write_predcell_to_csv(self.brain.L4_sensory_tm,
-                                  self.brain.L4_predictive_cells,
-                                  'L4_predictive',
-                                  self.brain.thought_count,
-                                  int(self.x),
-                                  int(self.y),
-                                  int(self.head_direction),
-                                  '-', '-')
+            # write_predcell_to_csv(self.brain.L4_sensory_tm,
+            #                       self.brain.L4_predictive_cells,
+            #                       'L4_predictive',
+            #                       self.brain.thought_count,
+            #                       int(self.x),
+            #                       int(self.y),
+            #                       int(self.head_direction),
+            #                       '-', '-')
 
             # write_winnercell_to_csv(self.brain.L4_sensory_tm,
             #                         'L4_winner',
@@ -118,6 +121,14 @@ class Animal:
             #                         int(self.y),
             #                         int(self.head_direction),
             #                         '-', '-')
+
+            write_activecell_to_csv(self.brain.L23_object_tm,
+                                    'L23_active',
+                                    self.brain.thought_count,
+                                    int(self.x),
+                                    int(self.y),
+                                    int(self.head_direction),
+                                    '-', '-')
 
         self.linear_speed = 0
         self.angular_velocity = 0
@@ -185,5 +196,5 @@ class Animal:
     def draw(self, display):
         """Function draw takes in a display to be drawn onto. Animal is draw at size,
         and casted rays from the eye are drawn as well"""
-        pygame.draw.circle(display, self.color, (self.x, self.y), self.size)
         self.eye.draw(display)
+        pygame.draw.circle(display, self.color, (self.x, self.y), self.size)
