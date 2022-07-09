@@ -8,6 +8,7 @@ import os
 fig = plt.figure()
 layer = 'L6a'
 cell_type = 'Active'
+dpi = 225
 
 path_L23_active =   'C:\Environments\HTMAI\Code\Output\L23_Active_Plots'
 path_L4_active =    'C:\Environments\HTMAI\Code\Output\L4_Active_Plots'
@@ -34,7 +35,7 @@ for i in range(256*32):
 
     if not df.empty:
         for k in range(4):
-
+            plt.clf()
             fig.suptitle(f'Cell {i} Activation')
             ax = fig.add_subplot(111, projection='3d')
 
@@ -55,21 +56,21 @@ for i in range(256*32):
             ax.set_zlabel('Head Direction (\N{DEGREE SIGN})')
 
             match k:
-                # case 0:
-                #     plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\\3D_Cell_{j}.png', dpi=250)
-                #     plt.clf()
+                case 0:
+                    plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\\3D_Cell_{i}.png', dpi=dpi)
+                    plt.clf()
 
                 case 1:
                     ax.view_init(-90, -90)  # xy
-                    plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\XY_Cell_{i}.png', dpi=250)
+                    plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\XY_Cell_{i}.png', dpi=dpi)
                     plt.clf()
 
-                # case 2:
-                #     ax.view_init(0, -90)  # xz
-                #     plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\XZ_Cell_{j}.png', dpi=250)
-                #     plt.clf()
-                #
-                # case 3:
-                #     ax.view_init(0, 0)  # yz
-                #     plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\YZ_Cell_{j}.png', dpi=250)
-                #     plt.clf()
+                case 2:
+                    ax.view_init(0, -90)  # xz
+                    plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\XZ_Cell_{i}.png', dpi=dpi)
+                    plt.clf()
+
+                case 3:
+                    ax.view_init(0, 0)  # yz
+                    plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\YZ_Cell_{i}.png', dpi=dpi)
+                    plt.clf()

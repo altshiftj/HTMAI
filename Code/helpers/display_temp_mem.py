@@ -7,7 +7,7 @@ plt.ion()
 figure = plt.figure()
 def initialize_display(animal):
 
-    num_cells = animal.brain.L23_object_tm_info.dimensions[0]
+    num_cells = animal.brain.L23_tm_info.dimensions[0]
     tm_depth = animal.brain.L23_object_tm.getCellsPerColumn()
 
     grid = np.zeros((num_cells, 3))
@@ -46,7 +46,7 @@ def display_active_cells(animal):
 
 
 def display_active_freq(animal):
-    active_freq = animal.brain.L23_object_tm_info.activationFrequency.activationFrequency
+    active_freq = animal.brain.L23_tm_info.activationFrequency.activationFrequency
     grid = initialize_display(animal)
 
     zval = active_freq

@@ -28,7 +28,7 @@ box = Box(800,600)
 # box.add_object(575,375,725,450)
 
 #instantiate Animal
-mouse = Animal(300,200,10,0,270,10)
+mouse = Animal(300,200,10,0,270,30)
 track = False
 
 #instantiate pygame environment
@@ -42,7 +42,7 @@ running = True
 noisex = PerlinNoise(octaves=2)
 noisey = PerlinNoise(octaves=3)
 count = 0
-perlin = [i*0.001 for i in range(50000)]
+perlin = [i*0.001 for i in range(2000000)]
 xdir = [noisex(i) for i in perlin]
 ydir = [noisey(i) for i in perlin]
 # endregion
@@ -70,7 +70,7 @@ def draw():
 
 
 # to do while running pygame
-while count<49999:
+while count<1999999:
     # Animal actions, i.e. look and move.
     # current inputs, mouse moves forward
 
@@ -95,6 +95,9 @@ while count<49999:
     if keys[pygame.K_f]:
         display_active_freq(mouse)
 
+    if keys[pygame.K_SPACE]:
+        track = True
+
     #capture events in pygame i.e. exit, keystrokes, etc.
     for event in pygame.event.get():
 
@@ -111,7 +114,7 @@ while count<49999:
     mouse.turn(xdir[count], ydir[count])
     mouse.move(2,box,'forward')
 
-    if count%10==0:
+    if count%25==0:
         mouse.think()
 
     count+=1
@@ -120,3 +123,5 @@ mouse.brain.L6a_location_tm.saveToFile('locTM', 'BINARY')
 mouse.brain.L6a_location_sp.saveToFile('locSP', 'BINARY')
 mouse.brain.L4_sensory_tm.saveToFile('senTM', 'BINARY')
 mouse.brain.L4_sensory_sp.saveToFile('senSP', 'BINARY')
+mouse.brain.L23_object_tm.saveToFile('objTM', 'BINARY')
+mouse.brain.L23_object_sp.saveToFile('objSP', 'BINARY')

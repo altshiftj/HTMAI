@@ -68,7 +68,9 @@ class Animal:
         self.brain.pool_object()
         self.brain.temporal_object()
 
-        if self.brain.thought_count > 2500:
+        self.brain.temporal_senses_object_context()
+
+        if self.brain.thought_count > 50000:
             write_activecell_to_csv(self.brain.L6a_location_tm,
                                     'L6a_active',
                                     self.brain.thought_count,
@@ -78,25 +80,6 @@ class Animal:
                                     self.linear_speed,
                                     self.angular_velocity)
 
-            # write_predcell_to_csv(self.brain.L6a_location_tm,
-            #                       self.brain.L6a_predictive_cells,
-            #                       'L6a_predictive',
-            #                       self.brain.thought_count,
-            #                       int(self.x),
-            #                       int(self.y),
-            #                       int(self.head_direction),
-            #                       self.linear_speed,
-            #                       self.angular_velocity)
-
-            # write_winnercell_to_csv(self.brain.L6a_location_tm,
-            #                         'L6a_winner',
-            #                         self.brain.thought_count,
-            #                         int(self.x),
-            #                         int(self.y),
-            #                         int(self.head_direction),
-            #                         self.linear_speed,
-            #                         self.angular_velocity)
-
             write_activecell_to_csv(self.brain.L4_sensory_tm,
                                     'L4_active',
                                     self.brain.thought_count,
@@ -104,23 +87,6 @@ class Animal:
                                     int(self.y),
                                     int(self.head_direction),
                                     '-','-')
-
-            # write_predcell_to_csv(self.brain.L4_sensory_tm,
-            #                       self.brain.L4_predictive_cells,
-            #                       'L4_predictive',
-            #                       self.brain.thought_count,
-            #                       int(self.x),
-            #                       int(self.y),
-            #                       int(self.head_direction),
-            #                       '-', '-')
-
-            # write_winnercell_to_csv(self.brain.L4_sensory_tm,
-            #                         'L4_winner',
-            #                         self.brain.thought_count,
-            #                         int(self.x),
-            #                         int(self.y),
-            #                         int(self.head_direction),
-            #                         '-', '-')
 
             write_activecell_to_csv(self.brain.L23_object_tm,
                                     'L23_active',
