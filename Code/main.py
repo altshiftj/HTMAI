@@ -45,6 +45,8 @@ display = pygame.Surface(WINDOW_SIZE)
 running = True
 
 iterations = 1250000
+record_iterations = 50000
+record_start = iterations - record_iterations
 count = 0
 
 # region Autoturn
@@ -136,7 +138,7 @@ while count<iterations - 1:
     if count%thought_step==0:
         mouse.think(track, mouse_speed, thought_step, learning)
 
-    if count == 1220000:
+    if count == record_start:
         track *= -1
         learning = False
 

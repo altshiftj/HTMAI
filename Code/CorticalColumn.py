@@ -80,7 +80,7 @@ class CorticalColumn:
             radius=0,
             resolution=30,
             seed=3,
-            size=int(3*self.movement_encoding_width / 8),
+            size=int(self.movement_encoding_width / 4),
             sparsity=0.02,
             # endregion
         )
@@ -106,7 +106,7 @@ class CorticalColumn:
             radius=0,
             resolution=1,
             seed=4,
-            size=int(self.movement_encoding_width/4),
+            size=int(3*self.movement_encoding_width/8),
             sparsity=0.02,
             # endregion
         )
@@ -175,7 +175,7 @@ class CorticalColumn:
             # region L6a_sp Parameters
             inputDimensions=[self.movement_SDR.size],
             columnDimensions=[self.number_of_columns],
-            potentialRadius=int(self.movement_encoding_width/4),
+            potentialRadius=int(self.movement_encoding_width),
             potentialPct=.85,
             globalInhibition=True,
             localAreaDensity=0.0625,
@@ -209,7 +209,7 @@ class CorticalColumn:
             maxSynapsesPerSegment=32,
             maxNewSynapseCount=16,
             activationThreshold=9,
-            minThreshold=4,
+            minThreshold=5,
             initialPermanence=0.21,
             connectedPermanence=0.14,
             permanenceIncrement=0.1,
@@ -230,7 +230,7 @@ class CorticalColumn:
             maxSynapsesPerSegment=32,
             maxNewSynapseCount=16,
             activationThreshold=9,
-            minThreshold=4,
+            minThreshold=5,
             initialPermanence=0.21,
             connectedPermanence=0.14,
             permanenceIncrement=0.1,
@@ -251,7 +251,7 @@ class CorticalColumn:
             maxSynapsesPerSegment=32,
             maxNewSynapseCount=16,
             activationThreshold=9,
-            minThreshold=4,
+            minThreshold=5,
             initialPermanence=0.21,
             connectedPermanence=0.14,
             permanenceIncrement=0.1,
