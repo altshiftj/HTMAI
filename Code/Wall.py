@@ -19,15 +19,15 @@ class Wall:
         self.length = dist(x1,y1, x2,y2)
         self.color_num = color
 
-        if color == 0:
+        if color == 1:
             self.color = 'red'
-        elif color == 1:
-            self.color = 'orange'
         elif color == 2:
-            self.color = 'yellow'
+            self.color = 'orange'
         elif color == 3:
-            self.color = 'green'
+            self.color = 'yellow'
         elif color == 4:
+            self.color = 'green'
+        elif color == 5:
             self.color = 'blue'
         else:
             self.color = 'purple'

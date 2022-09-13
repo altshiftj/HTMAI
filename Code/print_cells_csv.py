@@ -25,17 +25,17 @@ selected_columns = ['layer', 'thought_count', 'cell', 'column', 'x', 'y', 'head_
 
 df_1, df_2, df_3 = [x for _, x in df.groupby(df['layer'])]
 
-for i in range(256):
-    j=i*32
+for i in range(256*32):
+    j = i
     if not df_1.loc[df_1['cell'] == j].empty:
         df_1.loc[(df_1['cell'] == j)].to_csv(f'C:\Environments\HTMAI\Code\Output\L23_Active\cell{j}.csv')
 
-for i in range(256):
-    j = i * 32
+for i in range(256*32):
+    j = i
     if not df_2.loc[df_2['cell'] == j].empty:
         df_2.loc[(df_2['cell'] == j)].to_csv(f'C:\Environments\HTMAI\Code\Output\L4_Active\cell{j}.csv')
 
-for i in range(256):
-    j = i * 32
+for i in range(256*32):
+    j = i
     if not df_3.loc[df_3['cell'] == j].empty:
         df_3.loc[(df_3['cell'] == j)].to_csv(f'C:\Environments\HTMAI\Code\Output\L6a_Active\cell{j}.csv')

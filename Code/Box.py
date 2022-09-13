@@ -13,6 +13,8 @@ class Box:
         self.width = width
         self.height = height
 
+        self.seed_count=1
+
         # box is an array of walls
         self.walls = []
 
@@ -48,6 +50,8 @@ class Box:
             wall.draw(display)
 
     def generate_random_color(self):
-        random_color = random.randint(0,5)
+        random.seed(self.seed_count)
+        random_color = random.randint(1,6)
+        self.seed_count+=1
         return random_color
 

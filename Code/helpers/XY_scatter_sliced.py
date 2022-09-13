@@ -4,7 +4,7 @@ import pandas
 import os
 
 
-cell_number = 5920
+cell_number = 1600
 layer = 'L6a'
 cell_type = 'Active'
 dpi = 150

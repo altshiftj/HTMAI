@@ -8,11 +8,11 @@ import os
 fig = plt.figure()
 layer = 'L6a'
 cell_type = 'Active'
-dpi = 225
+dpi = 100
 
 path_L23_active =   'C:\Environments\HTMAI\Code\Output\L23_Active_Plots'
 path_L4_active =    'C:\Environments\HTMAI\Code\Output\L4_Active_Plots'
-path_L6a_active =    'C:\Environments\HTMAI\Code\Output\L6a_Active_Plots'
+path_L6a_active =   'C:\Environments\HTMAI\Code\Output\L6a_Active_Plots'
 
 L23_exist = os.path.exists(path_L23_active)
 L4_exist = os.path.exists(path_L4_active)
@@ -27,17 +27,20 @@ if not L4_exist:
 if not L6a_exist:
     os.makedirs(path_L6a_active)
 
-for i in range(256*32):
+for j in range(256):
+    i = j * 32
     if os.path.exists(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}\cell{i}.csv'):
         df = pandas.read_csv(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}\cell{i}.csv')
     else:
         continue
 
     if not df.empty:
-        for k in range(4):
+        for k in range(2):
             plt.clf()
             fig.suptitle(f'Cell {i} Activation')
             ax = fig.add_subplot(111, projection='3d')
+            plt.xlim(0,1600)
+            plt.ylim(0,1600)
 
             x = df['x'].values
             y = df['y'].values
@@ -56,7 +59,7 @@ for i in range(256*32):
             ax.set_zlabel('Head Direction (\N{DEGREE SIGN})')
 
             match k:
-                case 0:
+                case 3:
                     plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\\3D_Cell_{i}.png', dpi=dpi)
                     plt.clf()
 

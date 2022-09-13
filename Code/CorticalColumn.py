@@ -19,35 +19,19 @@ class CorticalColumn:
 
     def __init__(self, vision):
         #region Initialize
-
-        # Number of minicolumns in each layer
-        self.number_of_columns = 256
-
-        # Number of neurons per minicolumn
-        self.layer_depth = 32
+        self.number_of_columns = 256                            # Number of minicolumns in each layer
+        self.layer_depth = 32                                   # Number of neurons per minicolumn
 
         # SDR composed of encoded ray's angle, as well as the feedback it senses and sends back
-        ray_encoding_width = 64*64
-        vision_encoding_width = ray_encoding_width*len(vision)
+        self.ray_encoding_width = 64*64
+        vision_encoding_width = self.ray_encoding_width*len(vision)
         self.vision_SDR = htm.SDR([vision_encoding_width])
+        self.encoded_vision = []                                # Encoded feedforward input from the eye, list of encoded ray SDRs representing animal vision
 
-        # Randomly distributed SDR representing the angle of a ray
-        self.ray_angle_encoder = enc.RDSE()
-        # Randomly distributed SDR representing the feedback from a ray
-        self.ray_feedback_encoder = enc.RDSE()
-
-        # Encoded feedforward input from the eye, list of encoded ray SDRs representing animal vision
-        self.encoded_vision = []
-
-        # Encoded feedforward input from movement,
-        # SDR composed of encoded animal movement (speed and change in head_direction),
-        movement_encoding_width = 64*64
-        self.movement_SDR = htm.SDR([movement_encoding_width])
-        # Randomly distributed SDR representing distance traveled by an animal
-        self.linear_speed_encoder = enc.RDSE()
-        # Randomly distributed SDR representing change in head_direction
-        self.angular_velocity_encoder = enc.RDSE()
-
+        # Encoded feedforward input from movement
+        self.movement_encoding_width = 64*64
+        self.movement_SDR = htm.SDR([self.movement_encoding_width])
+        self.encoded_movement = []
 
         self.L23_object_sp = SP()
         self.L23_object_tm = TM()
@@ -69,9 +53,9 @@ class CorticalColumn:
             active_bits=0,
             category=0,
             radius=0,
-            resolution=15,
+            resolution=18,
             seed=1,
-            size=int(ray_encoding_width/2),
+            size=int(self.ray_encoding_width/2),
             sparsity=0.02,
             # endregion
         )
@@ -84,7 +68,19 @@ class CorticalColumn:
             radius=0,
             resolution=1,
             seed=2,
-            size=int(ray_encoding_width/2),
+            size=int(self.ray_encoding_width/2),
+            sparsity=0.04,
+            # endregion
+        )
+
+        l1_distance_enc_param = rdse_encoder_parameters(
+            # region Linear Speed Encoder Parameters
+            active_bits=0,
+            category=0,
+            radius=0,
+            resolution=30,
+            seed=3,
+            size=int(3*self.movement_encoding_width / 8),
             sparsity=0.02,
             # endregion
         )
@@ -95,9 +91,9 @@ class CorticalColumn:
             active_bits=0,
             category=0,
             radius=0,
-            resolution=20,
+            resolution=1,
             seed=3,
-            size=int(movement_encoding_width/2),
+            size=int(3*self.movement_encoding_width/8),
             sparsity=0.02,
             # endregion
         )
@@ -110,44 +106,34 @@ class CorticalColumn:
             radius=0,
             resolution=1,
             seed=4,
-            size=int(movement_encoding_width/2),
-            sparsity=0.04,
+            size=int(self.movement_encoding_width/4),
+            sparsity=0.02,
             # endregion
         )
 
         # Ray Angle and Length Encoders
-        # Encoder to encode a ray's angle using encoder parameters defined above
-        self.ray_angle_encoder = rdse_encoder(angle_enc_param)
-
-        # Encoder to encode a ray's feedback using encoder paramters defined above
-        self.ray_feedback_encoder = rdse_encoder(color_enc_param)
-
-        # Metric information of the vision SDR
-        self.vision_enc_info = Metrics([192,192], 999999999)
+        self.ray_angle_encoder = rdse_encoder(angle_enc_param)                  # Encoder to encode a ray's angle using encoder parameters defined above
+        self.ray_feedback_encoder = rdse_encoder(color_enc_param)               # Encoder to encode a ray's feedback using encoder paramters defined above
+        self.vision_enc_info = Metrics([self.vision_SDR.size], 999999999)                    # Metric information of the vision SDR
 
         # Turn and Speed Encoders
-        # Encoder to encode an animals speed using encoder paramters defined above
-        self.linear_speed_encoder = rdse_encoder(linear_speed_enc_param)
-
-        # Encoder to encode an animals head turning speed using encoder paramters defined above
-        self.angular_velocity_encoder = rdse_encoder(ang_velocity_enc_param)
-
-        # Metric information of the movement SDR
-        self.movement_enc_info = Metrics([64,64], 999999999)
+        self.l1_distance_encoder = rdse_encoder(l1_distance_enc_param)
+        self.linear_speed_encoder = rdse_encoder(linear_speed_enc_param)        # Encoder to encode an animals speed using encoder paramters defined above
+        self.angular_velocity_encoder = rdse_encoder(ang_velocity_enc_param)    # Encoder to encode an animals head turning speed using encoder paramters defined above
+        self.movement_enc_info = Metrics([self.movement_SDR.size], 999999999)                    # Metric information of the movement SDR
         # endregion
 
         # region Spatial Pooler
-
         # L23 object layer spatial pooler
         self.L23_object_sp = SP(
             # region L23_sp Parameters
-            inputDimensions=[self.number_of_columns,self.layer_depth],
-            columnDimensions=[self.number_of_columns,1],
-            potentialRadius=16,
+            inputDimensions=[self.number_of_columns*self.layer_depth],
+            columnDimensions=[self.number_of_columns],
+            potentialRadius=self.layer_depth,
             potentialPct=.85,
-            globalInhibition=False,
+            globalInhibition=True,
             localAreaDensity=0.0625,
-            numActiveColumnsPerInhArea=0,
+            #numActiveColumnsPerInhArea=1,
             # stimulusThreshold=0,
             synPermConnected=0.14,
             synPermActiveInc=0.04,
@@ -164,11 +150,11 @@ class CorticalColumn:
         # L4 sensory layer spatial pooler
         self.L4_sensory_sp = SP(
             # region L4_sp Parameters
-            inputDimensions=[192,192],
-            columnDimensions=[self.number_of_columns,1],
-            potentialRadius=20,
+            inputDimensions=[self.vision_SDR.size],
+            columnDimensions=[self.number_of_columns],
+            potentialRadius=self.ray_encoding_width,
             potentialPct=.85,
-            globalInhibition=False,
+            globalInhibition=True,
             localAreaDensity=0.0625,
             # numActiveColumnsPerInhArea=0,
             # stimulusThreshold=0,
@@ -187,11 +173,11 @@ class CorticalColumn:
         # L6a motion layer
         self.L6a_location_sp = SP(
             # region L6a_sp Parameters
-            inputDimensions=[64,64],
-            columnDimensions=[self.number_of_columns,1],
-            potentialRadius=6,
+            inputDimensions=[self.movement_SDR.size],
+            columnDimensions=[self.number_of_columns],
+            potentialRadius=int(self.movement_encoding_width/4),
             potentialPct=.85,
-            globalInhibition=False,
+            globalInhibition=True,
             localAreaDensity=0.0625,
             # numActiveColumnsPerInhArea=0,
             # stimulusThreshold=0,
@@ -219,10 +205,10 @@ class CorticalColumn:
             # region L23_tm Parameters
             columnDimensions=self.L23_object_sp.getColumnDimensions(),
             cellsPerColumn=self.layer_depth,
-            maxSegmentsPerCell=16,
+            maxSegmentsPerCell=64,
             maxSynapsesPerSegment=32,
             maxNewSynapseCount=16,
-            activationThreshold=8,
+            activationThreshold=9,
             minThreshold=4,
             initialPermanence=0.21,
             connectedPermanence=0.14,
@@ -240,10 +226,10 @@ class CorticalColumn:
             # region L4_tm Parameters
             columnDimensions=self.L4_sensory_sp.getColumnDimensions(),
             cellsPerColumn=self.layer_depth,
-            maxSegmentsPerCell=8,
+            maxSegmentsPerCell=64,
             maxSynapsesPerSegment=32,
             maxNewSynapseCount=16,
-            activationThreshold=8,
+            activationThreshold=9,
             minThreshold=4,
             initialPermanence=0.21,
             connectedPermanence=0.14,
@@ -253,7 +239,6 @@ class CorticalColumn:
             externalPredictiveInputs=(self.number_of_columns * self.layer_depth),
             checkInputs=1,
             seed = 9,
-
             # endregion
         )
 
@@ -262,10 +247,10 @@ class CorticalColumn:
             # region L6a_tm Parameters
             columnDimensions=self.L6a_location_sp.getColumnDimensions(),
             cellsPerColumn=self.layer_depth,
-            maxSegmentsPerCell=8,
+            maxSegmentsPerCell=64,
             maxSynapsesPerSegment=32,
             maxNewSynapseCount=16,
-            activationThreshold=8,
+            activationThreshold=9,
             minThreshold=4,
             initialPermanence=0.21,
             connectedPermanence=0.14,
@@ -283,8 +268,6 @@ class CorticalColumn:
         self.L4_tm_info = Metrics([self.L4_sensory_tm.numberOfCells()], 999999999)
         self.L6a_tm_info = Metrics([self.L6a_location_tm.numberOfCells()], 999999999)
         # endregion
-        self.a = SDR(1)
-        self.b = SDR(1)
 
     def encode_vision(self, vision):
         """Function encode_vision encodes the orientation and feedback of each ray in vision into SDRs"""
@@ -309,26 +292,30 @@ class CorticalColumn:
             self.encoded_vision.append(ray_SDR)
 
         # Make vision SDR a concatenation of all ray SDRs
-        self.vision_SDR.flatten()
         self.vision_SDR.concatenate(self.encoded_vision)
-        self.vision_SDR.reshape([192,192])
 
         # Record metrics of the vision SDR
         self.vision_enc_info.addData(self.vision_SDR)
 
         return
 
-    def encode_movement(self, linear_move, angular_turn):
+    def encode_movement(self, l1_distance, linear_move, angular_turn):
         """Function encode_movement encodes the 2D distance travelled and change in head direction of an animal into SDRs"""
+        self.encoded_movement.clear()
+
+        l1_distance_SDR = self.l1_distance_encoder.encode(l1_distance)
+        self.encoded_movement.append(l1_distance_SDR)
+
         # Create an SDR the of encoded distance moved
         linear_move_SDR = self.linear_speed_encoder.encode(linear_move)
+        self.encoded_movement.append(linear_move_SDR)
+
         # Create an SDR the of encoded change in head direction
         angular_move_SDR = self.angular_velocity_encoder.encode(angular_turn)
+        self.encoded_movement.append(angular_move_SDR)
 
         # Make movement SDR a concatenation of move and head direction SDRs
-        self.movement_SDR.flatten()
-        self.movement_SDR.concatenate(linear_move_SDR, angular_move_SDR)
-        self.movement_SDR.reshape([64,64])
+        self.movement_SDR.concatenate(self.encoded_movement)
 
         # Record metrics of the movement SDR
         self.movement_enc_info.addData(self.movement_SDR)
@@ -370,53 +357,51 @@ class CorticalColumn:
 
         return
 
-    def initialize(self, vision, linear_motion, angular_motion):
+    def initialize(self, vision, l1_distance, linear_motion, angular_motion):
         # Encode movement of the animal
-        self.encode_movement(linear_motion, angular_motion)
+        self.encode_movement(l1_distance, linear_motion, angular_motion)
         # Pool the movement encoding
-        self.pool(self.L6a_location_sp, self.L6a_active_columns, self.movement_SDR, True, self.L6a_sp_info)
+        self.pool(self.L6a_location_sp, self.L6a_active_columns, self.movement_SDR, False, self.L6a_sp_info)
         # Feedforward movement input into temporal memory layer L6a
-        self.feedforward_memory(self.L6a_location_tm, self.L6a_active_columns, True, self.L6a_tm_info)
+        self.feedforward_memory(self.L6a_location_tm, self.L6a_active_columns, False, self.L6a_tm_info)
 
         # Encode sensory vision of the animal eye
         self.encode_vision(vision)
         # Pool vision encoding
-        self.pool(self.L4_sensory_sp, self.L4_active_columns, self.vision_SDR, True, self.L4_sp_info)
+        self.pool(self.L4_sensory_sp, self.L4_active_columns, self.vision_SDR, False, self.L4_sp_info)
         # Feedforward sensory input into temporal memory layer L4
-        self.feedforward_memory(self.L4_sensory_tm, self.L4_active_columns, True, self.L4_tm_info)
+        self.feedforward_memory(self.L4_sensory_tm, self.L4_active_columns, False, self.L4_tm_info)
 
-    def process(self, vision, linear_motion, angular_motion):
+    def process(self, vision, l1_distance, linear_motion, angular_motion, learning):
         """Function process takes all actions of a cortical column, and condenses its possible actions into one function
         in a specific order."""
 
         # Encode movement of the animal
-        self.encode_movement(linear_motion, angular_motion)
+        self.encode_movement(l1_distance, linear_motion, angular_motion)
         # Pool the movement encoding
-        self.pool(self.L6a_location_sp, self.L6a_active_columns, self.movement_SDR, True, self.L6a_sp_info)
+        self.pool(self.L6a_location_sp, self.L6a_active_columns, self.movement_SDR, learning, self.L6a_sp_info)
         # Feedforward movement input into temporal memory layer L6a
-        self.feedforward_memory(self.L6a_location_tm, self.L6a_active_columns, True, self.L6a_tm_info)
+        self.feedforward_memory(self.L6a_location_tm, self.L6a_active_columns, learning, self.L6a_tm_info)
 
         # Feedback from L6a motion layer activation to L4 sensory layer
-        self.feedback_memory(self.L6a_location_tm, self.L4_sensory_tm, self.L4_active_columns, True, self.L4_tm_info)
+        self.feedback_memory(self.L6a_location_tm, self.L4_sensory_tm, self.L4_active_columns, learning, self.L4_tm_info)
 
         # Encode sensory vision of the animal eye
         self.encode_vision(vision)
         # Pool vision encoding
-        self.pool(self.L4_sensory_sp,self.L4_active_columns,self.vision_SDR,True,self.L4_sp_info)
+        self.pool(self.L4_sensory_sp,self.L4_active_columns,self.vision_SDR,learning,self.L4_sp_info)
         # Feedforward sensory input into temporal memory layer L4
-        self.feedforward_memory(self.L4_sensory_tm, self.L4_active_columns, True, self.L4_tm_info)
+        self.feedforward_memory(self.L4_sensory_tm, self.L4_active_columns, learning, self.L4_tm_info)
 
         # Feedback from L4 sensory layer activation to L6a motion layer
-        self.feedback_memory(self.L4_sensory_tm, self.L6a_location_tm, self.L6a_active_columns, True, self.L6a_tm_info)
-        self.a = self.L4_sensory_tm.getActiveCells()
+        self.feedback_memory(self.L4_sensory_tm, self.L6a_location_tm, self.L6a_active_columns, learning, self.L6a_tm_info)
 
         # Pool L4 sensory activation to L2/3 input
-        self.pool(self.L23_object_sp,self.L23_active_columns,self.L4_sensory_tm.getActiveCells(),True,self.L23_sp_info)
+        self.pool(self.L23_object_sp,self.L23_active_columns,self.L4_sensory_tm.getActiveCells(),learning,self.L23_sp_info)
         # Pool L4 sensory input into temporal memory layer L2/3
-        self.feedforward_memory(self.L23_object_tm, self.L23_active_columns, True, self.L23_tm_info)
+        self.feedforward_memory(self.L23_object_tm, self.L23_active_columns, learning, self.L23_tm_info)
 
         # Feedback from L2/3 object layer activation to L4 sensory layer
-        self.feedback_memory(self.L23_object_tm,self.L4_sensory_tm,self.L4_active_columns,True,self.L4_tm_info)
-        self.b = self.L4_sensory_tm.getActiveCells()
+        self.feedback_memory(self.L23_object_tm,self.L4_sensory_tm,self.L4_active_columns,learning,self.L4_tm_info)
 
         return

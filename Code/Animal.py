@@ -1,7 +1,7 @@
 from Brain import *
 from Eye import *
 from helpers.collisions import *
-from Code.helpers.cells_to_csv import *
+
 
 class Animal:
     """
@@ -19,6 +19,7 @@ class Animal:
     def __init__(self, x, y, size, head_direction, field_of_view, num_of_rays, color='white'):
         self.x = x
         self.y = y
+        self.l1_distance = 0
         self.linear_speed = 0
         self.angular_velocity = 0
 
@@ -28,7 +29,7 @@ class Animal:
         self.field_of_view = field_of_view
 
         self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, num_of_rays)
-        self.brain = Brain(self.eye, metrics_on=True)
+        self.brain = Brain(self.eye.vision)
 
         self.color = color
 
@@ -38,68 +39,47 @@ class Animal:
         self.eye.see(box, self.x, self.y, self.head_direction)
 
 
-    def think(self):
+    def think(self, track, move_speed, thought_step, learning):
         """Function think passes encoded Eye SDR to Brain for Spatial Pooling and Temporal Memory functions"""
         if self.brain.thought_count == 0:
-            self.brain.thought_count += 1
-            initialize_csv()
-            self.brain.encode_movement(self.linear_speed, self.angular_velocity)
-            self.brain.pool_movement()
-            self.brain.temporal_location()
+            self.brain.initialize(self.eye.vision, self.l1_distance, self.linear_speed, self.angular_velocity)
 
-            self.brain.encode_vision(self.eye)
-            self.brain.pool_senses()
-            self.brain.temporal_senses()
+        self.brain.think(self.eye.vision, self.l1_distance, self.linear_speed, self.angular_velocity, learning)
 
-        self.brain.thought_count += 1
+        if track == 1:
+            self.record()
 
-        self.brain.encode_movement(self.linear_speed, self.angular_velocity)
-        self.brain.pool_movement()
-        self.brain.temporal_location()
+        if self.l1_distance>5*move_speed*thought_step:
+            self.l1_distance = 0
 
-        self.brain.temporal_senses_motion_context()
-
-        self.brain.encode_vision(self.eye)
-        self.brain.pool_senses()
-        self.brain.temporal_senses()
-
-        self.brain.temporal_location_sensory_context()
-
-        self.brain.pool_object()
-        self.brain.temporal_object()
-
-        self.brain.temporal_senses_object_context()
-
-        if self.brain.thought_count > 50000:
-            write_activecell_to_csv(self.brain.L6a_location_tm,
-                                    'L6a_active',
-                                    self.brain.thought_count,
-                                    int(self.x),
-                                    int(self.y),
-                                    int(self.head_direction),
-                                    self.linear_speed,
-                                    self.angular_velocity)
-
-            write_activecell_to_csv(self.brain.L4_sensory_tm,
-                                    'L4_active',
-                                    self.brain.thought_count,
-                                    int(self.x),
-                                    int(self.y),
-                                    int(self.head_direction),
-                                    '-','-')
-
-            write_activecell_to_csv(self.brain.L23_object_tm,
-                                    'L23_active',
-                                    self.brain.thought_count,
-                                    int(self.x),
-                                    int(self.y),
-                                    int(self.head_direction),
-                                    '-', '-')
-
-        self.linear_speed = 0
         self.angular_velocity = 0
         return
 
+    def record(self):
+        write_activecell_to_csv(self.brain.cc1.L6a_location_tm,
+                                'L6a_active',
+                                self.brain.thought_count,
+                                int(self.x),
+                                int(self.y),
+                                int(self.head_direction),
+                                self.linear_speed,
+                                self.angular_velocity)
+
+        write_activecell_to_csv(self.brain.cc1.L4_sensory_tm,
+                                'L4_active',
+                                self.brain.thought_count,
+                                int(self.x),
+                                int(self.y),
+                                int(self.head_direction),
+                                '-','-')
+
+        write_activecell_to_csv(self.brain.cc1.L23_object_tm,
+                                'L23_active',
+                                self.brain.thought_count,
+                                int(self.x),
+                                int(self.y),
+                                int(self.head_direction),
+                                '-', '-')
 
     def move(self, step_size_move, box, direction):
         """Function move takes in a step size (speed), environment, and forward or backward direction
@@ -112,7 +92,9 @@ class Animal:
                     break
 
             if not collision:
-                self.linear_speed += step_size_move
+                self.linear_speed = step_size_move
+                self.l1_distance += step_size_move
+
                 self.x += step_size_move * math.cos(math.radians(self.head_direction))
                 self.y += step_size_move * math.sin(math.radians(self.head_direction))
 
@@ -123,7 +105,8 @@ class Animal:
                     break
 
             if not collision:
-                self.linear_speed += -step_size_move
+                self.linear_speed = -step_size_move
+                self.l1_distance -= step_size_move
                 self.x -= step_size_move * math.cos(math.radians(self.head_direction))
                 self.y -= step_size_move * math.sin(math.radians(self.head_direction))
 
@@ -138,25 +121,20 @@ class Animal:
             theta+=360
 
         if abs((theta - self.head_direction))>180 and theta>self.head_direction:
-            self.angular_velocity += (theta - (self.head_direction+360))
+            self.angular_velocity += round(theta - (self.head_direction+360))
         elif abs((theta - self.head_direction))>180 and theta<self.head_direction:
-            self.angular_velocity += ((theta+360) - self.head_direction)
+            self.angular_velocity += round((theta+360) - self.head_direction)
         else:
-            self.angular_velocity += (theta - self.head_direction)
+            self.angular_velocity += round(theta - self.head_direction)
 
-        self.head_direction = theta
+        self.head_direction = round(theta)
 
-        if self.head_direction < 0:
-            self.head_direction += 360
+        # if (self.head_direction + theta)>=360:
+        #     self.head_direction -= 360
+        # elif (self.head_direction + theta) < 0:
+        #     self.head_direction += 360
 
         return
-        # if (self.head_direction + step_size_turn)>=360:
-        #     self.head_direction -= 360
-        # elif (self.head_direction + step_size_turn) < 0:
-        #     self.head_direction += 360
-        #
-        # self.head_direction += step_size_turn
-        # self.angular_velocity += step_size_turn
 
 
     def draw(self, display):
