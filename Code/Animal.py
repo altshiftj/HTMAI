@@ -16,7 +16,7 @@ class Animal:
     head_direction - direction of movement and center of Animal vision (degrees)
     field_of_view - angular width of Animal view
     """
-    def __init__(self, x, y, size, head_direction, field_of_view, num_of_rays, color='white'):
+    def __init__(self, x, y, size, head_direction, field_of_view, num_of_rays, color='black'):
         self.x = x
         self.y = y
         self.l1_distance = 0
@@ -141,4 +141,5 @@ class Animal:
         """Function draw takes in a display to be drawn onto. Animal is draw at size,
         and casted rays from the eye are drawn as well"""
         self.eye.draw(display)
-        pygame.draw.circle(display, self.color, (self.x, self.y), self.size)
+        pygame.draw.circle(display, self.color, (self.x, self.y), self.size, 5)
+        pygame.draw.circle(display, 'white', (self.x, self.y), self.size-5)

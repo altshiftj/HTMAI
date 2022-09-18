@@ -5,75 +5,101 @@ from pylab import *
 import pandas
 import os
 
-fig = plt.figure()
-layer = 'L6a'
-cell_type = 'Active'
-dpi = 100
+def save_3d_scatters():
+    fig = plt.figure()
+    layers = [
+                'L6a',
+                'L4',
+                'L23'
+             ]
 
-path_L23_active =   'C:\Environments\HTMAI\Code\Output\L23_Active_Plots'
-path_L4_active =    'C:\Environments\HTMAI\Code\Output\L4_Active_Plots'
-path_L6a_active =   'C:\Environments\HTMAI\Code\Output\L6a_Active_Plots'
+    min_file_size = 10000
 
-L23_exist = os.path.exists(path_L23_active)
-L4_exist = os.path.exists(path_L4_active)
-L6a_exist = os.path.exists(path_L6a_active)
+    cell_type = 'Active'
+    dpi = 100
 
-if not L23_exist:
-    os.makedirs(path_L23_active)
+    for l in range(len(layers)):
 
-if not L4_exist:
-    os.makedirs(path_L4_active)
+        read_path = f'C:\Environments\HTMAI Output\\{layers[l]}_{cell_type}'
+        write_path = f'C:\Environments\HTMAI Output\\{layers[l]}_{cell_type}_Plots'
 
-if not L6a_exist:
-    os.makedirs(path_L6a_active)
+        write_path_3d = f'{write_path}\\3D'
+        write_path_xy = f'{write_path}\XY'
+        write_path_xz = f'{write_path}\XZ'
+        write_path_yz = f'{write_path}\YZ'
 
-for j in range(256):
-    i = j * 32
-    if os.path.exists(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}\cell{i}.csv'):
-        df = pandas.read_csv(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}\cell{i}.csv')
-    else:
-        continue
+        write_path_exist = os.path.exists(write_path)
+        if not write_path_exist:
+            os.makedirs(write_path)
+            os.makedirs(write_path_3d)
+            os.makedirs(write_path_xy)
+            os.makedirs(write_path_xz)
+            os.makedirs(write_path_yz)
 
-    if not df.empty:
-        for k in range(2):
-            plt.clf()
-            fig.suptitle(f'Cell {i} Activation')
-            ax = fig.add_subplot(111, projection='3d')
-            plt.xlim(0,1600)
-            plt.ylim(0,1600)
+        for j in range(256*32):
+            i = j
+            read_file = f'{read_path}\cell{i}.csv'
 
-            x = df['x'].values
-            y = df['y'].values
-            z = df['head direction'].values
+            write_file_3d = f'{write_path_3d}\\3D_Cell_{i}.png'
+            write_file_xy = f'{write_path_xy}\XY_Cell_{i}.png'
+            write_file_xz = f'{write_path_xz}\XZ_Cell_{i}.png'
+            write_file_yz = f'{write_path_yz}\YZ_Cell_{i}.png'
 
-            colmap = cm.ScalarMappable(cmap=cm.plasma)
-            colmap.set_array(z)
+            if os.path.exists(read_file) and os.path.getsize(read_file) > min_file_size:
+                df = pandas.read_csv(read_file)
+            else:
+                continue
 
-            img = ax.scatter(x, y, z, c=cm.plasma(z / max(z)), marker='o', s=6)
-
-            cb = fig.colorbar(colmap)
-            cb.set_label('Head Direction (\N{DEGREE SIGN})')
-
-            ax.set_xlabel('X Position')
-            ax.set_ylabel('Y Position')
-            ax.set_zlabel('Head Direction (\N{DEGREE SIGN})')
-
-            match k:
-                case 3:
-                    plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\\3D_Cell_{i}.png', dpi=dpi)
+            if not df.empty:
+                for k in range(4):
                     plt.clf()
+                    fig.suptitle(f'Layer {layers[l]}: Cell {i} Activation')
+                    ax = fig.add_subplot(111, projection='3d')
+                    plt.xlim(0,1600)
+                    plt.ylim(0,1600)
 
-                case 1:
-                    ax.view_init(-90, -90)  # xy
-                    plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\XY_Cell_{i}.png', dpi=dpi)
-                    plt.clf()
+                    x = df['x'].values
+                    y = df['y'].values
+                    z = df['head direction'].values
 
-                case 2:
-                    ax.view_init(0, -90)  # xz
-                    plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\XZ_Cell_{i}.png', dpi=dpi)
-                    plt.clf()
+                    colmap = cm.ScalarMappable(cmap=cm.plasma)
+                    colmap.set_array(z)
 
-                case 3:
-                    ax.view_init(0, 0)  # yz
-                    plt.savefig(f'C:\Environments\HTMAI\Code\Output\\{layer}_{cell_type}_Plots\YZ_Cell_{i}.png', dpi=dpi)
-                    plt.clf()
+                    img = ax.scatter(x, y, z, c=cm.plasma(z / max(z)), marker='o', s=6)
+
+                    cb = fig.colorbar(colmap)
+                    cb.set_label('Head Direction (\N{DEGREE SIGN})')
+
+                    ax.set_xlabel('X Position')
+                    ax.set_ylabel('Y Position')
+                    ax.set_zlabel('Head Direction (\N{DEGREE SIGN})')
+
+                    ax.tick_params(axis='both', which='major', labelsize=7)
+                    ax.tick_params(axis='both', which='minor', labelsize=7)
+
+                    match k:
+                        case 0:
+                            plt.savefig(write_file_3d, dpi=dpi)
+                            plt.clf()
+
+                        case 1:
+                            ax.view_init(-90, -90)  # xy
+                            ax.set_zticks([])
+                            ax.set_zlabel('')
+                            plt.savefig(write_file_xy, dpi=dpi)
+                            plt.clf()
+
+                        case 2:
+                            ax.view_init(0, -90)  # xz
+                            ax.set_yticks([])
+                            ax.set_ylabel('')
+                            ax.set_zlabel('')
+                            plt.savefig(write_file_xz, dpi=dpi)
+                            plt.clf()
+
+                        case 3:
+                            ax.view_init(0, 0)  # yz
+                            ax.set_xticks([])
+                            ax.set_xlabel('')
+                            plt.savefig(write_file_yz, dpi=dpi)
+                            plt.clf()

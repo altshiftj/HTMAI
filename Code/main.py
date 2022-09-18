@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 matplotlib.use("TkAgg")
 
 from helpers.display_temp_mem import *
+from helpers.save_3d_scatters import *
+from print_cells_csv import *
+
 plt.ion()
 
 from Box import *
@@ -17,23 +20,13 @@ from Example import *
 """
 Purpose of main is to manage the relationship between class Box and Animal, as well as implement pygame display
 """
-
-
 #instantiate Box
 box = Box(1600,1600)
-#box.add_object(100,75,1100,100)
-#box.add_object(150,175,550,200)
-# box.add_object(650,175,1050,200)
-#
-# box.add_object(100,400,200,500)
-# box.add_object(300,600,500,700)
-# box.add_object(900,300,1150,475)
-# box.add_object(575,375,725,450)
 
 #instantiate Animal
-mouse = Animal(300,200,10,0,270,15)
+mouse = Animal(300,800,20,0,270,15)
 learning = True
-mouse_speed = 3
+mouse_speed = 5
 thought_step = 10
 track = -1
 
@@ -44,9 +37,9 @@ screen_box = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(WINDOW_SIZE)
 running = True
 
-iterations = 1250000
-record_iterations = 50000
-record_start = iterations - record_iterations
+iterations = 1100000
+record_iterations = 100000
+start_recording = iterations - record_iterations
 count = 0
 
 # region Autoturn
@@ -62,7 +55,7 @@ def draw():
     draw function manages all objects to be displayed on the screen
     """
     # black background
-    display.fill((0, 0, 0))
+    display.fill(('white'))
 
     # draw Box with internal objects
     box.draw(display)
@@ -126,19 +119,17 @@ while count<iterations - 1:
             sys.exit()
             pygame.quit()
 
-
-
     # draw all shapes/images
     draw()
 
-    mouse.look(box)
     mouse.turn(xdir[count], ydir[count])
     mouse.move(mouse_speed, box, 'forward')
+    mouse.look(box)
 
     if count%thought_step==0:
         mouse.think(track, mouse_speed, thought_step, learning)
 
-    if count == record_start:
+    if count == start_recording:
         track *= -1
         learning = False
 
@@ -150,3 +141,6 @@ mouse.brain.cc1.L4_sensory_tm.saveToFile('senTM', 'BINARY')
 mouse.brain.cc1.L4_sensory_sp.saveToFile('senSP', 'BINARY')
 mouse.brain.cc1.L23_object_tm.saveToFile('objTM', 'BINARY')
 mouse.brain.cc1.L23_object_sp.saveToFile('objSP', 'BINARY')
+
+print_cells_csv()
+save_3d_scatters()

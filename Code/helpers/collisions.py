@@ -24,7 +24,7 @@ def ray_collision(ray, box):
                 ray.color_num = wall.color_num
     if ray.max_length<closest:
         ray.length = ray.max_length
-        ray.color = 'white'
+        ray.color = 'black'
         ray.color_num = 0
     ray.x2 = ray.x1 + ray.length * math.cos(ray.alloc_angle)
     ray.y2 = ray.y1 + ray.length * math.sin(ray.alloc_angle)

@@ -69,7 +69,7 @@ class CorticalColumn:
             resolution=1,
             seed=2,
             size=int(self.ray_encoding_width/2),
-            sparsity=0.04,
+            sparsity=0.02,
             # endregion
         )
 

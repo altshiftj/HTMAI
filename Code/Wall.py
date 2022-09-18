@@ -35,4 +35,4 @@ class Wall:
 
     def draw(self, display):
         """Function draw defines how a wall is drawn"""
-        pygame.draw.line(display, self.color, (self.x1,self.y1), (self.x2,self.y2), 3)
+        pygame.draw.line(display, self.color, (self.x1,self.y1), (self.x2,self.y2), 15)
