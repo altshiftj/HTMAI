@@ -29,27 +29,23 @@ class Animal:
         self.head_direction = head_direction
         self.field_of_view = field_of_view
 
-        self.eye1 = Eye(x, y, head_direction-field_of_view/2, field_of_view/3, size, 1200, num_of_rays)
-        self.eye2 = Eye(x, y, head_direction, field_of_view / 3, size, 1200, num_of_rays)
-        self.eye3 = Eye(x, y, head_direction+field_of_view/2, field_of_view / 3, size, 1200, num_of_rays)
-        self.brain = Brain(self.eye1.vision,self.eye2.vision,self.eye3.vision)
+        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, num_of_rays)
+        self.brain = Brain(self.eye.vision)
 
         self.color = color
 
 
     def look(self, box):
         """Function look takes in an environment and looks at it using Eye at Animal x and y in head_direction"""
-        self.eye1.see(box, self.x, self.y, self.head_direction)
-        self.eye2.see(box, self.x, self.y, self.head_direction)
-        self.eye3.see(box, self.x, self.y, self.head_direction)
+        self.eye.see(box, self.x, self.y, self.head_direction)
 
 
     def think(self, track, move_speed, thought_step, learning):
         """Function think passes encoded Eye SDR to Brain for Spatial Pooling and Temporal Memory functions"""
         if self.brain.thought_count == 0:
-            self.brain.initialize(self.eye1.vision, self.eye2.vision, self.eye3.vision, self.l1_distance, self.linear_speed, self.l1_angle, self.angular_velocity)
+            self.brain.initialize(self.eye.vision, self.l1_distance, self.linear_speed, self.l1_angle, self.angular_velocity)
 
-        self.brain.think(self.eye1.vision, self.eye2.vision, self.eye3.vision, self.l1_distance, self.linear_speed, self.l1_angle, self.angular_velocity, learning)
+        self.brain.think(self.eye.vision, self.l1_distance, self.linear_speed, self.l1_angle, self.angular_velocity, learning)
 
         if track == 1:
             self.record()
@@ -94,7 +90,7 @@ class Animal:
                                 int(self.x),
                                 int(self.y),
                                 int(self.head_direction),
-                                '-', '-')
+                                '-','-')
 
         write_activecell_to_csv(self.brain.cc1.L6a_tm,
                                 'L6a_active',
@@ -176,8 +172,6 @@ class Animal:
     def draw(self, display):
         """Function draw takes in a display to be drawn onto. Animal is draw at size,
         and casted rays from the eye are drawn as well"""
-        self.eye1.draw(display)
-        self.eye2.draw(display)
-        self.eye3.draw(display)
+        self.eye.draw(display)
         pygame.draw.circle(display, self.color, (self.x, self.y), self.size, 5)
         pygame.draw.circle(display, 'white', (self.x, self.y), self.size-5)

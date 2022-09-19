@@ -78,7 +78,7 @@ class CorticalColumn:
             active_bits=0,
             category=0,
             radius=0,
-            resolution=30,
+            resolution=100,
             seed=3,
             size=int(self.location_encoding_width / 2),
             sparsity=0.02,
@@ -167,7 +167,7 @@ class CorticalColumn:
             # region L4_sp Parameters
             inputDimensions=[self.vision_SDR.size],
             columnDimensions=[self.number_of_columns],
-            potentialRadius=self.ray_encoding_width,
+            potentialRadius=2*self.ray_encoding_width,
             potentialPct=.85,
             globalInhibition=True,
             localAreaDensity=0.0625,
