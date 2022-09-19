@@ -4,8 +4,8 @@ import pandas
 import os
 
 
-cell_number = 6368
-layer = 'L4'
+cell_number = 6848
+layer = 'L6b'
 cell_type = 'Active'
 dpi = 100
 

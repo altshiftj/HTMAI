@@ -8,12 +8,15 @@ import os
 def save_3d_scatters():
     fig = plt.figure()
     layers = [
-                'L6a',
-                'L4',
-                'L23'
-             ]
+        'L23',
+        'L4',
+        'L5a',
+        'L5b',
+        'L6a',
+        'L6b'
+        ]
 
-    min_file_size = 10000
+    min_file_size = 0
 
     cell_type = 'Active'
     dpi = 100
@@ -36,8 +39,8 @@ def save_3d_scatters():
             os.makedirs(write_path_xz)
             os.makedirs(write_path_yz)
 
-        for j in range(256*32):
-            i = j
+        for j in range(256):
+            i = j * 32
             read_file = f'{read_path}\cell{i}.csv'
 
             write_file_3d = f'{write_path_3d}\\3D_Cell_{i}.png'
@@ -51,7 +54,7 @@ def save_3d_scatters():
                 continue
 
             if not df.empty:
-                for k in range(4):
+                for k in range(1):
                     plt.clf()
                     fig.suptitle(f'Layer {layers[l]}: Cell {i} Activation')
                     ax = fig.add_subplot(111, projection='3d')
@@ -78,11 +81,11 @@ def save_3d_scatters():
                     ax.tick_params(axis='both', which='minor', labelsize=7)
 
                     match k:
-                        case 0:
+                        case 3:
                             plt.savefig(write_file_3d, dpi=dpi)
                             plt.clf()
 
-                        case 1:
+                        case 0:
                             ax.view_init(-90, -90)  # xy
                             ax.set_zticks([])
                             ax.set_zlabel('')
