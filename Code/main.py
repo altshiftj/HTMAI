@@ -24,7 +24,7 @@ Purpose of main is to manage the relationship between class Box and Animal, as w
 box = Box(1600,1600)
 
 #instantiate Animal
-mouse = Animal(300,800,20,0,60,10)
+mouse = Animal(300,800,20,0,180,10)
 learning = True
 mouse_speed = 5
 thought_step = 10
@@ -37,8 +37,8 @@ screen_box = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(WINDOW_SIZE)
 running = True
 
-iterations = 150
-record_iterations = 75
+iterations = 250000
+record_iterations = 75000
 start_recording = iterations - record_iterations
 count = 0
 

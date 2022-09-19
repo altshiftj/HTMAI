@@ -35,13 +35,13 @@ class Brain:
         self.cc2.process(vision2, l1_distance, linear_motion, l1_angle, angular_motion, learning)
         self.cc3.process(vision3, l1_distance, linear_motion, l1_angle, angular_motion, learning)
 
-        self.cc_connect(self.cc2,self.cc1)
-        self.cc_connect(self.cc1,self.cc2)
-        self.cc_connect(self.cc3,self.cc1)
-        self.cc_connect(self.cc1,self.cc3)
-        self.cc_connect(self.cc2,self.cc3)
-        self.cc_connect(self.cc3,self.cc2)
+        self.cc_connect(self.cc2,self.cc1, learning)
+        self.cc_connect(self.cc1,self.cc2, learning)
+        self.cc_connect(self.cc3,self.cc1, learning)
+        self.cc_connect(self.cc1,self.cc3, learning)
+        self.cc_connect(self.cc2,self.cc3, learning)
+        self.cc_connect(self.cc3,self.cc2, learning)
 
-    def cc_connect(self,cc1,cc2):
-        cc1.cc_feedback(cc2)
-        cc2.cc_feedback(cc1)
+    def cc_connect(self,cc1,cc2, learning):
+        cc1.cc_feedback(cc2, learning)
+        cc2.cc_feedback(cc1, learning)

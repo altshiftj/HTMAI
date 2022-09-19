@@ -167,7 +167,7 @@ class CorticalColumn:
             # region L4_sp Parameters
             inputDimensions=[self.vision_SDR.size],
             columnDimensions=[self.number_of_columns],
-            potentialRadius=2*self.ray_encoding_width,
+            potentialRadius=self.ray_encoding_width,
             potentialPct=.85,
             globalInhibition=True,
             localAreaDensity=0.0625,
@@ -594,6 +594,6 @@ class CorticalColumn:
 
         return
 
-    def cc_feedback(self, cc_from):
+    def cc_feedback(self, cc_from, learning):
         self.feedback_memory(cc_from.L23_tm, self.L23_tm, self.L23_active_columns, learning, self.L23_tm_info)
         self.feedback_memory(cc_from.L5a_tm, self.L5a_tm, self.L5a_active_columns, learning, self.L5a_tm_info)
