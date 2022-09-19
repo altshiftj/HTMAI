@@ -50,6 +50,7 @@ xdir = [noisex(i) for i in perlin]
 ydir = [noisey(i) for i in perlin]
 # endregion
 
+
 def draw():
     """
     draw function manages all objects to be displayed on the screen
