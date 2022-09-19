@@ -76,33 +76,8 @@ class Animal:
                                 int(self.head_direction),
                                 '-', '-')
 
-        write_activecell_to_csv(self.brain.cc1.L5a_tm,
-                                'L5a_active',
-                                self.brain.thought_count,
-                                int(self.x),
-                                int(self.y),
-                                int(self.head_direction),
-                                '-', '-')
-
-        write_activecell_to_csv(self.brain.cc1.L5b_tm,
-                                'L5b_active',
-                                self.brain.thought_count,
-                                int(self.x),
-                                int(self.y),
-                                int(self.head_direction),
-                                '-','-')
-
         write_activecell_to_csv(self.brain.cc1.L6a_tm,
                                 'L6a_active',
-                                self.brain.thought_count,
-                                int(self.x),
-                                int(self.y),
-                                int(self.head_direction),
-                                self.linear_speed,
-                                self.angular_velocity)
-
-        write_activecell_to_csv(self.brain.cc1.L6b_tm,
-                                'L6b_active',
                                 self.brain.thought_count,
                                 int(self.x),
                                 int(self.y),

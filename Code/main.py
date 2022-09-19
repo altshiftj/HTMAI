@@ -37,7 +37,7 @@ screen_box = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(WINDOW_SIZE)
 running = True
 
-iterations = 275000
+iterations = 175000
 record_iterations = 75000
 start_recording = iterations - record_iterations
 count = 0
@@ -160,12 +160,7 @@ mouse.brain.cc1.L4_tm.saveToFile('senTM', 'BINARY')
 mouse.brain.cc1.L4_sp.saveToFile('senSP', 'BINARY')
 mouse.brain.cc1.L23_tm.saveToFile('objTM', 'BINARY')
 mouse.brain.cc1.L23_sp.saveToFile('objSP', 'BINARY')
-mouse.brain.cc1.L6b_tm.saveToFile('locTM', 'BINARY')
-mouse.brain.cc1.L6b_sp.saveToFile('locSP', 'BINARY')
-mouse.brain.cc1.L5b_tm.saveToFile('senTM', 'BINARY')
-mouse.brain.cc1.L5b_sp.saveToFile('senSP', 'BINARY')
-mouse.brain.cc1.L5a_tm.saveToFile('objTM', 'BINARY')
-mouse.brain.cc1.L5a_sp.saveToFile('objSP', 'BINARY')
+
 
 print_cells_csv()
 save_3d_scatters()

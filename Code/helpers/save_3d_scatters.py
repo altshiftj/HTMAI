@@ -10,10 +10,7 @@ def save_3d_scatters():
     layers = [
         'L23',
         'L4',
-        'L5a',
-        'L5b',
-        'L6a',
-        'L6b'
+        'L6a'
         ]
 
     min_file_size = 0

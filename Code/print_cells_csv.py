@@ -6,10 +6,7 @@ def print_cells_csv():
     layers = [
         'L23',
         'L4',
-        'L5a',
-        'L5b',
-        'L6a',
-        'L6b'
+        'L6a'
     ]
 
     cell_type = 'active'
