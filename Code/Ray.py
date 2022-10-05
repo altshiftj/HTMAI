@@ -10,7 +10,7 @@ class Ray:
     y - y-position
     angle = orientation (degrees)
     """
-    def __init__(self, x, y, alloc_angle, ego_angle, max_length, color='white'):
+    def __init__(self, x, y, alloc_angle, ego_angle, max_length, color='black'):
         self.x1 = x
         self.y1 = y
 

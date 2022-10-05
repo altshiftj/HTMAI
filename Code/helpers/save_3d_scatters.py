@@ -6,7 +6,7 @@ import pandas
 import os
 
 def save_3d_scatters():
-    fig = plt.figure()
+    fig = plt.figure(figsize=[6,5], layout='tight')
     layers = [
         'L23',
         'L4',
@@ -37,7 +37,7 @@ def save_3d_scatters():
             os.makedirs(write_path_yz)
 
         for j in range(256):
-            i = j * 32
+            i = j*32
             read_file = f'{read_path}\cell{i}.csv'
 
             write_file_3d = f'{write_path_3d}\\3D_Cell_{i}.png'
@@ -51,7 +51,7 @@ def save_3d_scatters():
                 continue
 
             if not df.empty:
-                for k in range(1):
+                for k in range(4):
                     plt.clf()
                     fig.suptitle(f'Layer {layers[l]}: Cell {i} Activation')
                     ax = fig.add_subplot(111, projection='3d')
@@ -67,22 +67,23 @@ def save_3d_scatters():
 
                     img = ax.scatter(x, y, z, c=cm.plasma(z / max(z)), marker='o', s=6)
 
-                    cb = fig.colorbar(colmap)
+                    cb = fig.colorbar(colmap, fraction=0.033)
                     cb.set_label('Head Direction (\N{DEGREE SIGN})')
 
                     ax.set_xlabel('X Position')
                     ax.set_ylabel('Y Position')
                     ax.set_zlabel('Head Direction (\N{DEGREE SIGN})')
 
-                    ax.tick_params(axis='both', which='major', labelsize=7)
-                    ax.tick_params(axis='both', which='minor', labelsize=7)
+                    ax.tick_params(axis='both', which='major', labelsize=6)
+                    ax.tick_params(axis='both', which='minor', labelsize=6)
 
                     match k:
-                        case 3:
+                        case 0:
+                            ax.set_zlabel('')
                             plt.savefig(write_file_3d, dpi=dpi)
                             plt.clf()
 
-                        case 0:
+                        case 1:
                             ax.view_init(-90, -90)  # xy
                             ax.set_zticks([])
                             ax.set_zlabel('')

@@ -19,14 +19,14 @@ class Brain:
         self.thought_count = 0
         self.cc1 = CorticalColumn(vision)
 
-    def initialize(self, vision, l1_distance, linear_movement, l1_angle, angular_movement):
+    def initialize(self, vision, l1_distance, linear_movement, angular_movement):
         self.thought_count += 1
         initialize_csv()
-        self.cc1.initialize(vision, l1_distance, linear_movement, l1_angle, angular_movement)
+        self.cc1.initialize(vision, l1_distance, linear_movement, angular_movement)
 
-    def think(self, vision, l1_distance, linear_motion, l1_angle, angular_motion, learning):
+    def think(self, vision, l1_distance, linear_motion, angular_motion, learning):
         self.thought_count += 1
-        self.cc1.process(vision, l1_distance, linear_motion, l1_angle, angular_motion, learning)
+        self.cc1.process(vision, l1_distance, linear_motion, angular_motion, learning)
 
     def cc_connect(self,cc1,cc2):
         cc1.cc_feedback(cc2)

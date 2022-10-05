@@ -24,7 +24,7 @@ Purpose of main is to manage the relationship between class Box and Animal, as w
 box = Box(1600,1600)
 
 #instantiate Animal
-mouse = Animal(300,800,20,0,60,10)
+mouse = Animal(400,800,20,0,60,10)
 learning = True
 mouse_speed = 5
 thought_step = 10
@@ -37,8 +37,8 @@ screen_box = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(WINDOW_SIZE)
 running = True
 
-iterations = 175000
-record_iterations = 75000
+iterations = 4250000
+record_iterations = 250000
 start_recording = iterations - record_iterations
 count = 0
 
@@ -74,61 +74,29 @@ def draw():
 # to do while running pygame
 while count<iterations - 1:
     # Animal actions, i.e. look and move.
-    # current inputs, mouse moves forward
+    keys = pygame.key.get_pressed()
 
-    # keys = pygame.key.get_pressed()
-    #
-    # #region Keyboard Move
-    #
-    # if keys[pygame.K_RIGHT]:
-    #     mouse.turn(.5)
-    #
-    # if keys[pygame.K_LEFT]:
-    #     mouse.turn(-.5)
-    #
-    # if keys[pygame.K_UP]:
-    #     mouse.move(1,box,'forward')
-    #
-    # # endregion
-    #
-    # if keys[pygame.K_c]:
-    #     display_active_cells(mouse.brain.cc1.L23_tm, mouse.brain.cc1.L23_tm_info)
-    #
-    # if keys[pygame.K_v]:
-    #     display_active_freq(mouse.brain.cc1.L23_tm, mouse.brain.cc1.L23_tm_info)
-    #
-    # if keys[pygame.K_f]:
-    #     display_active_cells(mouse.brain.cc1.L4_tm, mouse.brain.cc1.L4_tm_info)
-    #
-    # if keys[pygame.K_g]:
-    #     display_active_freq(mouse.brain.cc1.L4_tm, mouse.brain.cc1.L4_tm_info)
-    #
-    # if keys[pygame.K_t]:
-    #     display_active_cells(mouse.brain.cc1.L6a_tm, mouse.brain.cc1.L6a_tm_info)
-    #
-    # if keys[pygame.K_y]:
-    #     display_active_freq(mouse.brain.cc1.L6a_tm, mouse.brain.cc1.L6a_tm_info)
-    #
-    # if keys[pygame.K_b]:
-    #     display_active_cells(mouse.brain.cc1.L5a_tm, mouse.brain.cc1.L5a_tm_info)
-    #
-    # if keys[pygame.K_n]:
-    #     display_active_freq(mouse.brain.cc1.L5a_tm, mouse.brain.cc1.L5a_tm_info)
-    #
-    # if keys[pygame.K_h]:
-    #     display_active_cells(mouse.brain.cc1.L5b_tm, mouse.brain.cc1.L5b_tm_info)
-    #
-    # if keys[pygame.K_j]:
-    #     display_active_freq(mouse.brain.cc1.L5b_tm, mouse.brain.cc1.L5b_tm_info)
-    #
-    # if keys[pygame.K_u]:
-    #     display_active_cells(mouse.brain.cc1.L6b_tm, mouse.brain.cc1.L6b_tm_info)
-    #
-    # if keys[pygame.K_i]:
-    #     display_active_freq(mouse.brain.cc1.L6b_tm, mouse.brain.cc1.L6b_tm_info)
-    #
-    # if keys[pygame.K_r]:
-    #     track *= -1
+    # Display neural activity
+    if keys[pygame.K_c]:
+        display_active_cells(mouse.brain.cc1.L23_tm, mouse.brain.cc1.L23_tm_info)
+
+    if keys[pygame.K_v]:
+        display_active_freq(mouse.brain.cc1.L23_tm, mouse.brain.cc1.L23_tm_info)
+
+    if keys[pygame.K_f]:
+        display_active_cells(mouse.brain.cc1.L4_tm, mouse.brain.cc1.L4_tm_info)
+
+    if keys[pygame.K_g]:
+        display_active_freq(mouse.brain.cc1.L4_tm, mouse.brain.cc1.L4_tm_info)
+
+    if keys[pygame.K_t]:
+        display_active_cells(mouse.brain.cc1.L6a_tm, mouse.brain.cc1.L6a_tm_info)
+
+    if keys[pygame.K_y]:
+        display_active_freq(mouse.brain.cc1.L6a_tm, mouse.brain.cc1.L6a_tm_info)
+
+    if keys[pygame.K_r]:
+        track *= -1
 
     #capture events in pygame i.e. exit, keystrokes, etc.
     for event in pygame.event.get():
@@ -154,6 +122,7 @@ while count<iterations - 1:
 
     count+=1
 
+#save HTM files
 mouse.brain.cc1.L6a_tm.saveToFile('locTM', 'BINARY')
 mouse.brain.cc1.L6a_sp.saveToFile('locSP', 'BINARY')
 mouse.brain.cc1.L4_tm.saveToFile('senTM', 'BINARY')
@@ -161,6 +130,6 @@ mouse.brain.cc1.L4_sp.saveToFile('senSP', 'BINARY')
 mouse.brain.cc1.L23_tm.saveToFile('objTM', 'BINARY')
 mouse.brain.cc1.L23_sp.saveToFile('objSP', 'BINARY')
 
-
+#create and save neural firing plots
 print_cells_csv()
 save_3d_scatters()

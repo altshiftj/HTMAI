@@ -21,7 +21,6 @@ class Animal:
         self.y = y
         self.l1_distance = 0
         self.linear_speed = 0
-        self.l1_angle = 0
         self.angular_velocity = 0
 
         self.size = size
@@ -43,18 +42,15 @@ class Animal:
     def think(self, track, move_speed, thought_step, learning):
         """Function think passes encoded Eye SDR to Brain for Spatial Pooling and Temporal Memory functions"""
         if self.brain.thought_count == 0:
-            self.brain.initialize(self.eye.vision, self.l1_distance, self.linear_speed, self.l1_angle, self.angular_velocity)
+            self.brain.initialize(self.eye.vision, self.l1_distance, self.linear_speed, self.angular_velocity)
 
-        self.brain.think(self.eye.vision, self.l1_distance, self.linear_speed, self.l1_angle, self.angular_velocity, learning)
+        self.brain.think(self.eye.vision, self.l1_distance, self.linear_speed, self.angular_velocity, learning)
 
         if track == 1:
             self.record()
 
-        if self.l1_distance>10*move_speed*thought_step:
+        if self.l1_distance>5*move_speed*thought_step:
             self.l1_distance = 0
-
-        if self.l1_angle > 60:
-            self.l1_angle = 0
 
         self.angular_velocity = 0
         return
@@ -117,10 +113,6 @@ class Animal:
 
 
     def turn(self, xdir, ydir):
-
-        if xdir==0:
-            xdir+=.01
-
         theta = math.degrees(math.atan2(ydir,xdir))
         if theta < 0:
             theta+=360
@@ -132,7 +124,6 @@ class Animal:
         else:
             self.angular_velocity += round(theta - self.head_direction)
 
-        self.l1_angle += self.angular_velocity
         self.head_direction = round(theta)
 
 

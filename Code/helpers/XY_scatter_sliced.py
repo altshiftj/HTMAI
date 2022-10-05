@@ -4,19 +4,14 @@ import pandas
 import os
 
 
-cell_number = 6848
-layer = 'L6b'
+cell_number = 7520
+layer = 'L23'
 cell_type = 'Active'
 dpi = 100
 
 read_path = f'C:\Environments\HTMAI Output\\{layer}_{cell_type}\cell{cell_number}.csv'
-# write_path = f'C:\Environments\HTMAI\Code\Output\\{layer}_HD_Slice_Plots'
 
 read_path_exist = os.path.exists(read_path)
-# write_path_exist = os.path.exists(write_path)
-
-# if not write_path_exist:
-#     os.makedirs(write_path)
 
 if os.path.exists(read_path):
     df = pandas.read_csv(read_path)
