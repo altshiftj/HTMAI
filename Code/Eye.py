@@ -6,7 +6,6 @@ from htm.encoders import *
 from htm.bindings.algorithms import SpatialPooler
 from htm.bindings.algorithms import TemporalMemory
 from helpers.encode_helper import *
-from helpers.display_SDR import *
 
 from Ray import *
 

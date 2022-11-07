@@ -7,7 +7,6 @@ from htm.algorithms import TemporalMemory as TM
 import htm.bindings.encoders as enc
 from htm.bindings.sdr import *
 
-from helpers.display_SDR import *
 from helpers.encode_helper import *
 
 
@@ -314,7 +313,6 @@ class CorticalColumn:
 
         return
 
-
     def pool(self, pooler, active_columns, input_SDR, learning, metrics):
         """Function pool computes active columns of a temporal layer"""
         pooler.compute(input_SDR, learning, active_columns)
@@ -324,7 +322,7 @@ class CorticalColumn:
 
     def feedforward_memory(self, tm, active_columns, learning, metrics_to):
         """Function feedforward_memory recieves a temporal memory layer, its active columns, whether it learns or not
-        and if metrics are to be recorded, and computes the current active and predictive cells cells """
+        and if metrics are to be recorded, and computes the current active and predictive cells"""
         tm.activateDendrites(learn=learning)
         tm.activateCells(active_columns, learn=learning)
         metrics_to.addData(tm.getActiveCells().flatten())
@@ -364,7 +362,7 @@ class CorticalColumn:
         self.feedforward_memory(self.L4_tm, self.L4_active_columns, False, self.L4_tm_info)
 
     def process(self, vision, l1_distance, linear_motion, angular_motion, learning):
-        """Function process takes all actions of a cortical column, and condenses its possible actions into one function
+        """Function process takes all actions of a cortical column and condenses its possible actions into one function
         in a specific order."""
 
         # Encode movement of the animal

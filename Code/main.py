@@ -9,13 +9,12 @@ matplotlib.use("TkAgg")
 
 from helpers.display_temp_mem import *
 from helpers.save_3d_scatters import *
-from print_cells_csv import *
+from Code.helpers.print_cells_csv import *
 
 plt.ion()
 
 from Box import *
 from Animal import *
-from Example import *
 
 """
 Purpose of main is to manage the relationship between class Box and Animal, as well as implement pygame display
@@ -37,8 +36,8 @@ screen_box = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(WINDOW_SIZE)
 running = True
 
-iterations = 4250000
-record_iterations = 250000
+iterations = 4250
+record_iterations = 250
 start_recording = iterations - record_iterations
 count = 0
 
