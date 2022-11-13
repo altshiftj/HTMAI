@@ -5,10 +5,14 @@ matplotlib.use("TkAgg")
 
 plt.ion()
 figure = plt.figure()
-def initialize_display(animal):
 
-    num_cells = animal.brain.L6a_location_tm_info.dimensions[0]
-    tm_depth = animal.brain.L6a_location_tm.getCellsPerColumn()
+
+def initialize_display(tm, tm_info):
+    """Function initialize_display receives an animal and specfic layer within the brains cortical column.
+    Initalize set a"""
+
+    num_cells = tm_info.dimensions[0]
+    tm_depth = tm.getCellsPerColumn()
 
     grid = np.zeros((num_cells, 3))
 
@@ -35,9 +39,9 @@ def display(grid):
     figure.canvas.flush_events()
 
 
-def display_active_cells(animal):
-    active_cells = animal.brain.L6a_location_tm.getActiveCells()
-    grid = initialize_display(animal)
+def display_active_cells(tm, tm_info):
+    active_cells = tm.getActiveCells()
+    grid = initialize_display(tm, tm_info)
 
     zval = active_cells.dense.reshape(-1)
 
@@ -45,9 +49,9 @@ def display_active_cells(animal):
     display(grid)
 
 
-def display_active_freq(animal):
-    active_freq = animal.brain.L6a_location_tm_info.activationFrequency.activationFrequency
-    grid = initialize_display(animal)
+def display_active_freq(tm, tm_info):
+    active_freq = tm_info.activationFrequency.activationFrequency
+    grid = initialize_display(tm, tm_info)
 
     zval = active_freq
     grid[:, 2] = zval

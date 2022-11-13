@@ -10,7 +10,7 @@ class Ray:
     y - y-position
     angle = orientation (degrees)
     """
-    def __init__(self, x, y, alloc_angle, ego_angle, max_length, color='white'):
+    def __init__(self, x, y, alloc_angle, ego_angle, max_length, color='black'):
         self.x1 = x
         self.y1 = y
 
@@ -34,6 +34,7 @@ class Ray:
         self.y2 = self.y1 + self.length * math.sin(self.alloc_angle)
 
         self.color = color
+        self.color_num = 0
 
 
     def update(self, x, y, alloc_angle, box):
@@ -52,8 +53,6 @@ class Ray:
         return
 
 
-
-
     def draw(self, display):
         """Function draw defines how a ray is drawn"""
-        pygame.draw.line(display, self.color, (self.x1,self.y1) , (self.x2,self.y2))
+        pygame.draw.line(display, self.color, (self.x1,self.y1) , (self.x2,self.y2), 5)

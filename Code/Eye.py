@@ -6,7 +6,6 @@ from htm.encoders import *
 from htm.bindings.algorithms import SpatialPooler
 from htm.bindings.algorithms import TemporalMemory
 from helpers.encode_helper import *
-from helpers.display_SDR import *
 
 from Ray import *
 
@@ -37,7 +36,7 @@ class Eye:
         del_angle = int(self.field_of_view/(self.number_of_rays))
         start = self.direction - int(self.field_of_view/2)
         while ang*del_angle<=self.field_of_view:
-            self.vision.append(Ray(x, y, start+ang*del_angle, int(-self.field_of_view/2+ang/del_angle), max_vision))
+            self.vision.append(Ray(x, y, start+ang*del_angle, int(-self.field_of_view/2+ang*del_angle), max_vision))
             ang+=1
 
         return
