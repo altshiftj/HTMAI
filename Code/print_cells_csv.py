@@ -11,7 +11,7 @@ def print_cells_csv():
 
     cell_type = 'active'
 
-    read_path = "/Code/cell_fire.csv"
+    read_path = "cell_fire.csv"
 
     df = pd.read_csv(read_path)
 
