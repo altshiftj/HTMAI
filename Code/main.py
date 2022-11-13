@@ -1,15 +1,12 @@
-import numpy as np
 from pygame.locals import *             # import for quit
-import pygame                           # import for display and update
-import sys                              # import for exit
 from perlin_noise import PerlinNoise    #
 import matplotlib
-import matplotlib.pyplot as plt
+
 matplotlib.use("TkAgg")
 
 from helpers.display_temp_mem import *
 from helpers.save_3d_scatters import *
-from Code.helpers.print_cells_csv import *
+from Code.print_cells_csv import *
 
 plt.ion()
 

@@ -12,17 +12,18 @@ from helpers.encode_helper import *
 
 class CorticalColumn:
     """
-    Class Cortical Column defines an object which creates encoded SDRs from sensory objects
+    Class Cortical Column defines an object which creates encoded SDRs from sensory input
     and carries out the operation of Spatial Pooling and Temporal Memory on the SDRs.
     """
 
     def __init__(self, vision):
-        #region Initialize
         number_of_columns = 256
         layer_depth = 32
 
+        # region Encoders
+
         # SDR composed of encoded ray's angle, as well as the feedback it senses and sends back
-        ray_encoding_width = 64*64
+        ray_encoding_width = 64 * 64
         self.vision_SDR = htm.SDR([ray_encoding_width])
         self.encoded_vision = []
 
@@ -31,12 +32,6 @@ class CorticalColumn:
         self.movement_SDR = htm.SDR([movement_encoding_width])
         self.encoded_movement = []
 
-        self.L23_active_columns = SDR(number_of_columns)
-        self.L4_active_columns = SDR(number_of_columns)
-        self.L6a_active_columns = SDR(number_of_columns)
-        #endregion
-
-        # region Encoders
         # Ray Angle encoder parameters
         angle_enc_param = rdse_encoder_parameters(
             # region Angle Encoder Parameters
@@ -115,6 +110,11 @@ class CorticalColumn:
         # endregion
 
         # region Spatial Pooler
+
+        self.L23_active_columns = SDR(number_of_columns)
+        self.L4_active_columns = SDR(number_of_columns)
+        self.L6a_active_columns = SDR(number_of_columns)
+
         # L23 object layer spatial pooler
         self.L23_sp = SP(
             # region L23_sp Parameters
