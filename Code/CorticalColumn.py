@@ -2,7 +2,6 @@ import numpy as np
 import math
 import csv
 import htm
-import multiprocessing as mp
 from htm.algorithms import SpatialPooler as SP
 from htm.algorithms import TemporalMemory as TM
 import htm.bindings.encoders as enc
@@ -97,7 +96,7 @@ class CorticalColumn:
             # endregion
         )
 
-        # Ray Angle and Color Encoders
+        # Ray Angle and Length Encoders
         self.ray_angle_encoder = rdse_encoder(angle_enc_param)
         self.ray_feedback_encoder = rdse_encoder(color_enc_param)
         self.vision_enc_info = Metrics([self.vision_SDR.size], 999999999)
@@ -106,7 +105,7 @@ class CorticalColumn:
         self.l1_distance_encoder = rdse_encoder(l1_distance_enc_param)
         self.linear_speed_encoder = rdse_encoder(linear_speed_enc_param)
         self.angular_velocity_encoder = rdse_encoder(ang_velocity_enc_param)
-        
+
         self.location_enc_info = Metrics([self.movement_SDR.size], 999999999)
         # endregion
 
@@ -119,12 +118,12 @@ class CorticalColumn:
         # L23 object layer spatial pooler
         self.L23_sp = SP(
             # region L23_sp Parameters
-            inputDimensions=[number_of_columns*layer_depth],
+            inputDimensions=[number_of_columns * layer_depth],
             columnDimensions=[number_of_columns],
-            potentialRadius=(number_of_columns*layer_depth),
+            potentialRadius=(number_of_columns * layer_depth),
             potentialPct=.85,
             globalInhibition=True,
-            localAreaDensity=8/256,
+            localAreaDensity=8 / 256,
             # numActiveColumnsPerInhArea=1,
             # stimulusThreshold=0,
             synPermConnected=0.14,
@@ -147,7 +146,7 @@ class CorticalColumn:
             potentialRadius=ray_encoding_width,
             potentialPct=.85,
             globalInhibition=True,
-            localAreaDensity=12/256,
+            localAreaDensity=12 / 256,
             # numActiveColumnsPerInhArea=0,
             # stimulusThreshold=0,
             synPermConnected=0.14,
@@ -170,7 +169,7 @@ class CorticalColumn:
             potentialRadius=movement_encoding_width,
             potentialPct=.85,
             globalInhibition=True,
-            localAreaDensity=12/256,
+            localAreaDensity=12 / 256,
             # numActiveColumnsPerInhArea=0,
             # stimulusThreshold=0,
             synPermConnected=0.14,
@@ -230,7 +229,7 @@ class CorticalColumn:
             predictedSegmentDecrement=0.01,
             externalPredictiveInputs=(number_of_columns * layer_depth),
             checkInputs=1,
-            seed = 10,
+            seed=10,
             # endregion
         )
 
@@ -251,7 +250,7 @@ class CorticalColumn:
             predictedSegmentDecrement=0.01,
             externalPredictiveInputs=(number_of_columns * layer_depth),
             checkInputs=1,
-            seed = 11,
+            seed=11,
             # endregion
         )
 
@@ -269,7 +268,6 @@ class CorticalColumn:
 
         # Encode rays and add to vision SDR list
         for ray in vision:
-
             # Encode ray angles and feedback
             ray_angle_SDR = self.ray_angle_encoder.encode(int(ray.degree_ego_angle))
             ray_length_SDR = self.ray_feedback_encoder.encode(ray.color_num)
@@ -334,7 +332,7 @@ class CorticalColumn:
         """Function feedback_memory takes active cells from one layer and sends it activity to another layer.
         The to_layer is therefore receving feedback from another layer's activation"""
 
-        #Activate dendrites of the neurons in a temporal layer
+        # Activate dendrites of the neurons in a temporal layer
         tm_to.activateDendrites(
             learn=learning,
             externalPredictiveInputsActive=tm_from.getActiveCells(),
@@ -363,21 +361,46 @@ class CorticalColumn:
         self.pool(self.L23_sp, self.L23_active_columns, self.L4_tm.getActiveCells(), learning, self.L23_sp_info)
         self.feedforward_memory(self.L23_tm, self.L23_active_columns, learning, self.L23_tm_info)
 
+    def initialize(self, vision, l1_distance, linear_motion, angular_motion):
+        # Encode movement of the animal
+        self.encode_movement(l1_distance, linear_motion, angular_motion)
+        self.pool(self.L6a_sp, self.L6a_active_columns, self.movement_SDR, False, self.L6a_sp_info)
+        self.feedforward_memory(self.L6a_tm, self.L6a_active_columns, False, self.L6a_tm_info)
+
+        # Encode sensory vision of the animal eye
+        self.encode_vision(vision)
+        # Pool vision encoding
+        self.pool(self.L4_sp, self.L4_active_columns, self.vision_SDR, False, self.L4_sp_info)
+        # Feedforward sensory input into temporal memory layer L4
+        self.feedforward_memory(self.L4_tm, self.L4_active_columns, False, self.L4_tm_info)
 
     def process(self, vision, l1_distance, linear_motion, angular_motion, learning):
         """Function process takes all actions of a cortical column and condenses its possible actions into one function
         in a specific order."""
 
-        p1=mp.Process(target=self.feedforward_motion, args=(l1_distance, linear_motion, angular_motion,))
-        p2=mp.Process(target=self.feedforward_vision, args=(vision,))
-
-        p1.start()
-        p2.start()
-
+        # Encode movement of the animal
+        self.encode_movement(l1_distance, linear_motion, angular_motion)
+        # Pool the movement encoding
+        self.pool(self.L6a_sp, self.L6a_active_columns, self.movement_SDR, learning, self.L6a_sp_info)
+        # Feedforward movement input into temporal memory layer L6a
+        self.feedforward_memory(self.L6a_tm, self.L6a_active_columns, learning, self.L6a_tm_info)
+        # Feedback from L6a motion layer activation to L4 sensory layer
         self.feedback_memory(self.L6a_tm, self.L4_tm, self.L4_active_columns, learning, self.L4_tm_info)
+
+        # Encode sensory vision of the animal eye
+        self.encode_vision(vision)
+        # Pool vision encoding
+        self.pool(self.L4_sp, self.L4_active_columns, self.vision_SDR, learning, self.L4_sp_info)
+        # Feedforward sensory input into temporal memory layer L4
+        self.feedforward_memory(self.L4_tm, self.L4_active_columns, learning, self.L4_tm_info)
+        # Feedback from L4 sensory layer activation to L6a motion layer
         self.feedback_memory(self.L4_tm, self.L6a_tm, self.L6a_active_columns, learning, self.L6a_tm_info)
 
-        self.feedforward_object()
+        # Pool L4 sensory activation to L2/3 input
+        self.pool(self.L23_sp, self.L23_active_columns, self.L4_tm.getActiveCells(), learning, self.L23_sp_info)
+        # Pool L4 sensory input into temporal memory layer L2/3
+        self.feedforward_memory(self.L23_tm, self.L23_active_columns, learning, self.L23_tm_info)
+        # Feedback from L2/3 object layer activation to L4 sensory layer
         self.feedback_memory(self.L23_tm, self.L4_tm, self.L4_active_columns, learning, self.L4_tm_info)
 
         return

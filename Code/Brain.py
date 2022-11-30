@@ -21,6 +21,7 @@ class Brain:
 
     def initialize(self, vision, l1_distance, linear_movement, angular_movement):
         self.thought_count += 1
+        self.cc1.initialize(vision, l1_distance, linear_movement, angular_movement)
         initialize_neural_activity_location_csv()
 
     def think(self, vision, l1_distance, linear_motion, angular_motion, learning):
