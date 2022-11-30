@@ -8,9 +8,6 @@ figure = plt.figure()
 
 
 def initialize_display(tm, tm_info):
-    """Function initialize_display receives an animal and specfic layer within the brains cortical column.
-    Initalize set a"""
-
     num_cells = tm_info.dimensions[0]
     tm_depth = tm.getCellsPerColumn()
 

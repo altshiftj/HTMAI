@@ -2,6 +2,7 @@ import numpy as np
 import math
 import csv
 import htm
+import multiprocessing as mp
 from htm.algorithms import SpatialPooler as SP
 from htm.algorithms import TemporalMemory as TM
 import htm.bindings.encoders as enc
@@ -96,7 +97,7 @@ class CorticalColumn:
             # endregion
         )
 
-        # Ray Angle and Length Encoders
+        # Ray Angle and Color Encoders
         self.ray_angle_encoder = rdse_encoder(angle_enc_param)
         self.ray_feedback_encoder = rdse_encoder(color_enc_param)
         self.vision_enc_info = Metrics([self.vision_SDR.size], 999999999)
@@ -124,7 +125,7 @@ class CorticalColumn:
             potentialPct=.85,
             globalInhibition=True,
             localAreaDensity=8/256,
-            #numActiveColumnsPerInhArea=1,
+            # numActiveColumnsPerInhArea=1,
             # stimulusThreshold=0,
             synPermConnected=0.14,
             synPermActiveInc=0.04,
@@ -348,46 +349,35 @@ class CorticalColumn:
 
         return
 
-    def initialize(self, vision, l1_distance, linear_motion, angular_motion):
-        # Encode movement of the animal
+    def feedforward_motion(self, l1_distance, linear_motion, angular_motion):
         self.encode_movement(l1_distance, linear_motion, angular_motion)
         self.pool(self.L6a_sp, self.L6a_active_columns, self.movement_SDR, False, self.L6a_sp_info)
         self.feedforward_memory(self.L6a_tm, self.L6a_active_columns, False, self.L6a_tm_info)
 
-        # Encode sensory vision of the animal eye
+    def feedforward_vision(self, vision):
         self.encode_vision(vision)
-        # Pool vision encoding
         self.pool(self.L4_sp, self.L4_active_columns, self.vision_SDR, False, self.L4_sp_info)
-        # Feedforward sensory input into temporal memory layer L4
         self.feedforward_memory(self.L4_tm, self.L4_active_columns, False, self.L4_tm_info)
+
+    def feedforward_object(self):
+        self.pool(self.L23_sp, self.L23_active_columns, self.L4_tm.getActiveCells(), learning, self.L23_sp_info)
+        self.feedforward_memory(self.L23_tm, self.L23_active_columns, learning, self.L23_tm_info)
+
 
     def process(self, vision, l1_distance, linear_motion, angular_motion, learning):
         """Function process takes all actions of a cortical column and condenses its possible actions into one function
         in a specific order."""
 
-        # Encode movement of the animal
-        self.encode_movement(l1_distance, linear_motion, angular_motion)
-        # Pool the movement encoding
-        self.pool(self.L6a_sp, self.L6a_active_columns, self.movement_SDR, learning, self.L6a_sp_info)
-        # Feedforward movement input into temporal memory layer L6a
-        self.feedforward_memory(self.L6a_tm, self.L6a_active_columns, learning, self.L6a_tm_info)
-        # Feedback from L6a motion layer activation to L4 sensory layer
-        self.feedback_memory(self.L6a_tm, self.L4_tm, self.L4_active_columns, learning, self.L4_tm_info)
+        p1=mp.Process(target=self.feedforward_motion, args=(l1_distance, linear_motion, angular_motion,))
+        p2=mp.Process(target=self.feedforward_vision, args=(vision,))
 
-        # Encode sensory vision of the animal eye
-        self.encode_vision(vision)
-        # Pool vision encoding
-        self.pool(self.L4_sp, self.L4_active_columns, self.vision_SDR, learning, self.L4_sp_info)
-        # Feedforward sensory input into temporal memory layer L4
-        self.feedforward_memory(self.L4_tm, self.L4_active_columns, learning, self.L4_tm_info)
-        # Feedback from L4 sensory layer activation to L6a motion layer
+        p1.start()
+        p2.start()
+
+        self.feedback_memory(self.L6a_tm, self.L4_tm, self.L4_active_columns, learning, self.L4_tm_info)
         self.feedback_memory(self.L4_tm, self.L6a_tm, self.L6a_active_columns, learning, self.L6a_tm_info)
 
-        # Pool L4 sensory activation to L2/3 input
-        self.pool(self.L23_sp, self.L23_active_columns, self.L4_tm.getActiveCells(), learning, self.L23_sp_info)
-        # Pool L4 sensory input into temporal memory layer L2/3
-        self.feedforward_memory(self.L23_tm, self.L23_active_columns, learning, self.L23_tm_info)
-        # Feedback from L2/3 object layer activation to L4 sensory layer
+        self.feedforward_object()
         self.feedback_memory(self.L23_tm, self.L4_tm, self.L4_active_columns, learning, self.L4_tm_info)
 
         return
@@ -396,3 +386,7 @@ class CorticalColumn:
         self.feedback_memory(cc_from.L23_tm, self.L23_tm, self.L23_active_columns, learning, self.L23_tm_info)
 
         return
+
+if __name__=='__main__':
+    cc = CorticalColumn()
+    cc.process(vision, l1_distance, linear_motion, angular_motion, learning)

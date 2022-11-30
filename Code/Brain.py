@@ -7,7 +7,7 @@ import htm.bindings.encoders as enc
 from htm.bindings.sdr import *
 from CorticalColumn import *
 
-from Code.helpers.cells_to_csv import *
+from Code.helpers.neural_activity_to_csv import *
 
 class Brain:
     """
@@ -21,12 +21,14 @@ class Brain:
 
     def initialize(self, vision, l1_distance, linear_movement, angular_movement):
         self.thought_count += 1
-        initialize_csv()
-        self.cc1.initialize(vision, l1_distance, linear_movement, angular_movement)
+        initialize_neural_activity_location_csv()
 
     def think(self, vision, l1_distance, linear_motion, angular_motion, learning):
         self.thought_count += 1
         self.cc1.process(vision, l1_distance, linear_motion, angular_motion, learning)
+
+    def record_activity(self):
+        pass
 
     def cc_connect(self,cc1,cc2):
         cc1.cc_feedback(cc2)

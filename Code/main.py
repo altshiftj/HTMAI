@@ -22,8 +22,8 @@ box = Box(1600,1600)
 #instantiate Animal
 mouse = Animal(400,800,20,0,60,10)
 learning = True
-mouse_speed = 5
-thought_step = 10
+MOUSE_SPEED = 5
+THOUGHT_STEP = 10
 track = -1
 
 #instantiate pygame environment
@@ -33,15 +33,15 @@ screen_box = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(WINDOW_SIZE)
 running = True
 
-iterations = 4250
-record_iterations = 250
-start_recording = iterations - record_iterations
+ITERATIONS = 2500
+RECORD_ITERATIONS = 2000
+START_RECORDING = ITERATIONS - RECORD_ITERATIONS
 count = 0
 
 # region Autoturn
 noisex = PerlinNoise(octaves=2)
 noisey = PerlinNoise(octaves=3)
-perlin = [i*0.001 for i in range(iterations)]
+perlin = [i * 0.001 for i in range(ITERATIONS)]
 xdir = [noisex(i) for i in perlin]
 ydir = [noisey(i) for i in perlin]
 # endregion
@@ -68,7 +68,7 @@ def draw():
 
 
 # to do while running pygame
-while count<iterations - 1:
+while count<ITERATIONS - 1:
     # Animal actions, i.e. look and move.
     keys = pygame.key.get_pressed()
 
@@ -106,13 +106,13 @@ while count<iterations - 1:
     draw()
 
     mouse.turn(xdir[count], ydir[count])
-    mouse.move(mouse_speed, box, 'forward')
+    mouse.move(MOUSE_SPEED, box, 'forward')
     mouse.look(box)
 
-    if count%thought_step==0:
-        mouse.think(track, mouse_speed, thought_step, learning)
+    if count % THOUGHT_STEP==0:
+        mouse.think(track, MOUSE_SPEED, THOUGHT_STEP, learning)
 
-    if count == start_recording:
+    if count == START_RECORDING:
         track *= -1
         learning = False
 

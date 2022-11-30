@@ -4,8 +4,8 @@ import pandas
 import os
 
 
-cell_number = 7520
-layer = 'L23'
+cell_number = 416
+layer = 'L4'
 cell_type = 'Active'
 dpi = 100
 
@@ -16,7 +16,7 @@ read_path_exist = os.path.exists(read_path)
 if os.path.exists(read_path):
     df = pandas.read_csv(read_path)
 else:
-    print(f'No cell {cell_number} file')
+    print(f'No cell {layer}-{cell_number} file')
     exit()
 
 fig = plt.figure(dpi=dpi)
