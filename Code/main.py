@@ -55,7 +55,6 @@ xdir = [noise.noise2(i, 0) for i in simplex]
 ydir = [noise.noise2(0, i) for i in simplex]
 # endregion
 
-1
 
 def draw():
     """
