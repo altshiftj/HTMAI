@@ -1,5 +1,5 @@
 import pygame
-from helpers.geometry import *
+from Code.helpers.geometry import *
 
 
 class Wall:

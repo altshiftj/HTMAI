@@ -1,6 +1,5 @@
 import pygame
-
-from helpers.collisions import *
+from Code.helpers.collisions import *
 
 class Ray:
     """

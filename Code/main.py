@@ -1,12 +1,13 @@
 from pygame.locals import *             # import for quit
-from perlin_noise import PerlinNoise    #
+from opensimplex import OpenSimplex    #
 import matplotlib
+import csv
 
 matplotlib.use("TkAgg")
 
 from helpers.display_temp_mem import *
 from helpers.save_3d_scatters import *
-from Code.print_cells_csv import *
+from print_cells_csv import *
 
 plt.ion()
 
@@ -20,10 +21,16 @@ Purpose of main is to manage the relationship between class Box and Animal, as w
 box = Box(1600,1600)
 
 #instantiate Animal
-mouse = Animal(400,800,20,0,60,10)
+mouse = Animal(x_pos=400,
+               y_pos=800,
+               size=20,
+               head_direction=0,
+               limb_length=40,
+               field_of_view=60,
+               num_of_rays=10)
 learning = True
-mouse_speed = 5
-thought_step = 10
+MOUSE_SPEED = 3
+THOUGHT_STEP = 1
 track = -1
 
 #instantiate pygame environment
@@ -33,19 +40,22 @@ screen_box = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(WINDOW_SIZE)
 running = True
 
-iterations = 4250
-record_iterations = 250
-start_recording = iterations - record_iterations
+ITERATIONS = 10000
+RECORD_ITERATIONS = 1000
+START_RECORDING = ITERATIONS - RECORD_ITERATIONS
 count = 0
 
 # region Autoturn
-noisex = PerlinNoise(octaves=2)
-noisey = PerlinNoise(octaves=3)
-perlin = [i*0.001 for i in range(iterations)]
-xdir = [noisex(i) for i in perlin]
-ydir = [noisey(i) for i in perlin]
+# Create an instance of the OpenSimplex noise generator
+noise = OpenSimplex(seed=1)
+
+# Generate the directions using OpenSimplex noise
+simplex = [i * 0.0075 for i in range(ITERATIONS)]
+xdir = [noise.noise2(i, 0) for i in simplex]
+ydir = [noise.noise2(0, i) for i in simplex]
 # endregion
 
+1
 
 def draw():
     """
@@ -68,7 +78,7 @@ def draw():
 
 
 # to do while running pygame
-while count<iterations - 1:
+while count<ITERATIONS - 1:
     # Animal actions, i.e. look and move.
     keys = pygame.key.get_pressed()
 
@@ -105,14 +115,13 @@ while count<iterations - 1:
     # draw all shapes/images
     draw()
 
-    mouse.turn(xdir[count], ydir[count])
-    mouse.move(mouse_speed, box, 'forward')
+    mouse.move(MOUSE_SPEED, xdir[count], ydir[count], box, 'forward')
     mouse.look(box)
 
-    if count%thought_step==0:
-        mouse.think(track, mouse_speed, thought_step, learning)
+    if count % THOUGHT_STEP==0:
+        mouse.think(track, MOUSE_SPEED, THOUGHT_STEP, learning)
 
-    if count == start_recording:
+    if count == START_RECORDING:
         track *= -1
         learning = False
 

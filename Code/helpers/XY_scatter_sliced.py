@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.widgets import RangeSlider
 import pandas
 import os
 
 
-cell_number = 7520
-layer = 'L23'
+cell_number = 416
+layer = 'L4'
 cell_type = 'Active'
 dpi = 100
 
@@ -15,8 +16,9 @@ read_path_exist = os.path.exists(read_path)
 
 if os.path.exists(read_path):
     df = pandas.read_csv(read_path)
+    data = df.to_numpy()
 else:
-    print(f'No cell {cell_number} file')
+    print(f'No cell {layer}-{cell_number} file')
     exit()
 
 fig = plt.figure(dpi=dpi)
@@ -25,6 +27,8 @@ fig.suptitle(f'Layer {layer}: Cell {cell_number} Activation')
 x = df['x'].values
 y = df['y'].values
 z = df['head direction'].values
+
+
 
 plt.xlabel('X Position', fontsize='small')
 plt.ylabel('Y Position')

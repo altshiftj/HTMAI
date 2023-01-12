@@ -68,3 +68,11 @@ def find_intersect(ray, wall):
 
 def dot (x1,y1 , x2,y2):
     pass
+
+def cross (line1,line2):
+    vector1 = (line1[1][0] - line1[0][0], line1[1][1] - line1[0][1])
+    vector2 = (line2[1][0] - line2[0][0], line2[1][1] - line2[0][1])
+
+    cross_product = (vector1[0] * vector2[1]) - (vector1[1] * vector2[0])
+
+    return cross_product

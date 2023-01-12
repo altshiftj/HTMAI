@@ -5,9 +5,7 @@ from htm.algorithms import SpatialPooler as SP
 from htm.algorithms import TemporalMemory as TM
 import htm.bindings.encoders as enc
 from htm.bindings.sdr import *
-from CorticalColumn import *
-
-from Code.helpers.cells_to_csv import *
+from Code.CorticalColumn import *
 
 class Brain:
     """
@@ -17,16 +15,17 @@ class Brain:
     """
     def __init__(self, vision):
         self.thought_count = 0
-        self.cc1 = CorticalColumn(vision)
+        self.cc1 = CorticalColumn(vision, 32, 32)
 
-    def initialize(self, vision, l1_distance, linear_movement, angular_movement):
+    def initialize(self, vision, motion):
         self.thought_count += 1
-        initialize_csv()
-        self.cc1.initialize(vision, l1_distance, linear_movement, angular_movement)
+        self.cc1.initialize(vision, motion)
 
-    def think(self, vision, l1_distance, linear_motion, angular_motion, learning):
+    def think(self, track, vision, motion, learning):
         self.thought_count += 1
-        self.cc1.process(vision, l1_distance, linear_motion, angular_motion, learning)
+        self.cc1.process(vision, motion, learning)
+
+
 
     def cc_connect(self,cc1,cc2):
         cc1.cc_feedback(cc2)

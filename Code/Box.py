@@ -1,5 +1,5 @@
-from Wall import *
-from helpers.geometry import *
+from Code.Wall import *
+from Code.helpers.geometry import *
 import random
 
 

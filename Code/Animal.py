@@ -1,6 +1,7 @@
-from Brain import *
-from Eye import *
-from helpers.collisions import *
+from Code.Brain import *
+from Code.Eye import *
+from Code.Limb import *
+from Code.helpers.collisions import *
 
 
 class Animal:
@@ -16,19 +17,44 @@ class Animal:
     head_direction - direction of movement and center of Animal vision (degrees)
     field_of_view - angular width of Animal view
     """
-    def __init__(self, x, y, size, head_direction, field_of_view, num_of_rays, color='black'):
-        self.x = x
-        self.y = y
+    def __init__(self, x_pos, y_pos, size, head_direction, limb_length, field_of_view, num_of_rays, color='black'):
+        self.x = x_pos
+        self.y = y_pos
         self.l1_distance = 0
         self.linear_speed = 0
         self.angular_velocity = 0
+        self.turn_angle=0
+        self.motions = [self.l1_distance, self.linear_speed, self.angular_velocity]
 
         self.size = size
 
         self.head_direction = head_direction
         self.field_of_view = field_of_view
 
-        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, num_of_rays)
+        self.eye = Eye(x_pos,
+                       y_pos,
+                       head_direction,
+                       field_of_view,
+                       size,
+                       1200,
+                       num_of_rays)
+
+        # self.right_limb = Limb(joint_pos_x=x_pos,
+        #                       joint_pos_y=y_pos,
+        #                       move_direction=head_direction,
+        #                       range_of_motion=120,
+        #                       length=limb_length,
+        #                       ego_angle=90)
+        #
+        # self.left_limb = Limb(joint_pos_x=x_pos,
+        #                       joint_pos_y=y_pos,
+        #                       move_direction=head_direction,
+        #                       range_of_motion=120,
+        #                       length=limb_length,
+        #                       ego_angle=270)
+        #
+        # self.limbs = [self.left_limb, self.right_limb]
+
         self.brain = Brain(self.eye.vision)
 
         self.color = color
@@ -42,9 +68,12 @@ class Animal:
     def think(self, track, move_speed, thought_step, learning):
         """Function think passes encoded Eye SDR to Brain for Spatial Pooling and Temporal Memory functions"""
         if self.brain.thought_count == 0:
-            self.brain.initialize(self.eye.vision, self.l1_distance, self.linear_speed, self.angular_velocity)
+            self.brain.initialize(self.eye.vision, self.motions)
+            create_location_csv()
 
-        self.brain.think(self.eye.vision, self.l1_distance, self.linear_speed, self.angular_velocity, learning)
+        self.motions = [self.l1_distance, self.linear_speed, self.angular_velocity]
+
+        self.brain.think(track, self.eye.vision, self.motions, learning)
 
         if track == 1:
             self.record()
@@ -54,6 +83,7 @@ class Animal:
 
         self.angular_velocity = 0
         return
+
 
     def record(self):
         write_activecell_to_csv(self.brain.cc1.L23_tm,
@@ -82,11 +112,11 @@ class Animal:
                                 self.angular_velocity)
 
 
-    def move(self, step_size_move, box, direction):
+    def move(self, step_size_move, xdir, ydir, box, direction):
         """Function move takes in a step size (speed), environment, and forward or backward direction
         to define movement. Animal moves within the environment checking for collisions as it goes"""
+        self.turn(xdir, ydir)
         if direction == 'forward':
-
             for wall in box.walls:
                 collision = move_collision(self, wall, True)
                 if collision:
@@ -98,6 +128,7 @@ class Animal:
 
                 self.x += step_size_move * math.cos(math.radians(self.head_direction))
                 self.y += step_size_move * math.sin(math.radians(self.head_direction))
+
 
         if direction == 'backward':
             for wall in box.walls:
@@ -111,26 +142,32 @@ class Animal:
                 self.x -= step_size_move * math.cos(math.radians(self.head_direction))
                 self.y -= step_size_move * math.sin(math.radians(self.head_direction))
 
+        # for limb in self.limbs:
+        #     limb.move(speed=step_size_move,
+        #               turn=self.turn_angle,
+        #               head_direction=self.head_direction,
+        #               x=self.x,
+        #               y=self.y)
+
 
     def turn(self, xdir, ydir):
+        # print("Direction: ", xdir, ydir)
+        a = math.atan2(ydir, xdir)
         theta = math.degrees(math.atan2(ydir,xdir))
         if theta < 0:
             theta+=360
 
         if abs((theta - self.head_direction))>180 and theta>self.head_direction:
-            self.angular_velocity += round(theta - (self.head_direction+360))
+            self.turn_angle = round(theta - (self.head_direction+360))
+            self.angular_velocity += self.turn_angle
         elif abs((theta - self.head_direction))>180 and theta<self.head_direction:
-            self.angular_velocity += round((theta+360) - self.head_direction)
+            self.turn_angle = round((theta+360) - self.head_direction)
+            self.angular_velocity += self.turn_angle
         else:
-            self.angular_velocity += round(theta - self.head_direction)
+            self.turn_angle = round(theta - self.head_direction)
+            self.angular_velocity += self.turn_angle
 
         self.head_direction = round(theta)
-
-
-        # if (self.head_direction + theta)>=360:
-        #     self.head_direction -= 360
-        # elif (self.head_direction + theta) < 0:
-        #     self.head_direction += 360
 
         return
 
@@ -139,5 +176,10 @@ class Animal:
         """Function draw takes in a display to be drawn onto. Animal is draw at size,
         and casted rays from the eye are drawn as well"""
         self.eye.draw(display)
+        # for limb in self.limbs:
+        #     limb.draw(display)
         pygame.draw.circle(display, self.color, (self.x, self.y), self.size, 5)
         pygame.draw.circle(display, 'white', (self.x, self.y), self.size-5)
+
+    def print(self):
+        print('Animal x: ', self.x, 'Animal y: ', self.y, 'Animal head_direction: ', self.head_direction)
