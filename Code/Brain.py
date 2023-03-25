@@ -1,10 +1,5 @@
 import numpy as np
 import csv
-import htm
-from htm.algorithms import SpatialPooler as SP
-from htm.algorithms import TemporalMemory as TM
-import htm.bindings.encoders as enc
-from htm.bindings.sdr import *
 from CorticalColumn import *
 
 from Code.helpers.cells_to_csv import *
@@ -28,6 +23,7 @@ class Brain:
         self.thought_count += 1
         self.cc1.process(vision, l1_distance, linear_motion, angular_motion, learning)
 
+    # Function to laterally connect two cortical columns
     def cc_connect(self,cc1,cc2):
         cc1.cc_feedback(cc2)
         cc2.cc_feedback(cc1)

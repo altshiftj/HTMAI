@@ -17,8 +17,8 @@ class CorticalColumn:
     """
 
     def __init__(self, vision):
-        number_of_columns = 256
-        layer_depth = 32
+        number_of_columns = 64
+        layer_depth = 16
 
         # region Encoders
 
@@ -98,7 +98,7 @@ class CorticalColumn:
 
         # Ray Angle and Length Encoders
         self.ray_angle_encoder = rdse_encoder(angle_enc_param)
-        self.ray_feedback_encoder = rdse_encoder(color_enc_param)
+        self.ray_color_encoder = rdse_encoder(color_enc_param)
         self.vision_enc_info = Metrics([self.vision_SDR.size], 999999999)
 
         # Turn and Speed Encoders
@@ -271,7 +271,7 @@ class CorticalColumn:
 
             # Encode ray angles and feedback
             ray_angle_SDR = self.ray_angle_encoder.encode(int(ray.degree_ego_angle))
-            ray_length_SDR = self.ray_feedback_encoder.encode(ray.color_num)
+            ray_length_SDR = self.ray_color_encoder.encode(ray.color_num)
 
             # Create ray SDR whose size is the sum of the sizes of angle and feedback SDRs
             ray_SDR = htm.SDR(ray_angle_SDR.size)

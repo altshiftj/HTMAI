@@ -16,11 +16,11 @@ class Animal:
     head_direction - direction of movement and center of Animal vision (degrees)
     field_of_view - angular width of Animal view
     """
-    def __init__(self, x, y, size, head_direction, field_of_view, num_of_rays, color='black'):
-        self.x = x
-        self.y = y
+    def __init__(self, x_pos, y_pos, size, head_direction, field_of_view, num_of_rays, learning, speed, thought_freq, record, color='black'):
+        self.x = x_pos
+        self.y = y_pos
         self.l1_distance = 0
-        self.linear_speed = 0
+        self.linear_speed = speed
         self.angular_velocity = 0
 
         self.size = size
@@ -28,8 +28,11 @@ class Animal:
         self.head_direction = head_direction
         self.field_of_view = field_of_view
 
-        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, num_of_rays)
+        self.eye = Eye(x_pos, y_pos, head_direction, field_of_view, size, 1200, num_of_rays)
         self.brain = Brain(self.eye.vision)
+        self.learning = learning
+        self.thought_freq = thought_freq
+        self.record = record
 
         self.color = color
 

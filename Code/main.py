@@ -6,6 +6,7 @@ matplotlib.use("TkAgg")
 
 from helpers.display_temp_mem import *
 from helpers.save_3d_scatters import *
+from helpers.topology_helpers import *
 from Code.print_cells_csv import *
 
 plt.ion()
@@ -20,7 +21,15 @@ Purpose of main is to manage the relationship between class Box and Animal, as w
 box = Box(1600,1600)
 
 #instantiate Animal
-mouse = Animal(400,800,20,0,60,10)
+mouse = Animal(xpos = 400,
+               ypos = 800,
+               size = 20,
+               head_direction = 0,
+               field_of_view = 60,
+               num_of_rays = 10,
+               learning = True,
+               thought_freq = 10,
+               record = False,)
 learning = True
 mouse_speed = 5
 thought_step = 10
@@ -33,8 +42,8 @@ screen_box = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(WINDOW_SIZE)
 running = True
 
-iterations = 4250
-record_iterations = 250
+iterations = 100
+record_iterations = 50
 start_recording = iterations - record_iterations
 count = 0
 
@@ -118,14 +127,16 @@ while count<iterations - 1:
 
     count+=1
 
+get_graph_theory(mouse.brain.cc1.L4_tm, mouse.brain.cc1.L4_tm_info)
+
 #save HTM files
-mouse.brain.cc1.L6a_tm.saveToFile('locTM', 'BINARY')
-mouse.brain.cc1.L6a_sp.saveToFile('locSP', 'BINARY')
-mouse.brain.cc1.L4_tm.saveToFile('senTM', 'BINARY')
-mouse.brain.cc1.L4_sp.saveToFile('senSP', 'BINARY')
-mouse.brain.cc1.L23_tm.saveToFile('objTM', 'BINARY')
-mouse.brain.cc1.L23_sp.saveToFile('objSP', 'BINARY')
+# mouse.brain.cc1.L6a_tm.saveToFile('locTM', 'BINARY')
+# mouse.brain.cc1.L6a_sp.saveToFile('locSP', 'BINARY')
+# mouse.brain.cc1.L4_tm.saveToFile('senTM', 'BINARY')
+# mouse.brain.cc1.L4_sp.saveToFile('senSP', 'BINARY')
+# mouse.brain.cc1.L23_tm.saveToFile('objTM', 'BINARY')
+# mouse.brain.cc1.L23_sp.saveToFile('objSP', 'BINARY')
 
 #create and save neural firing plots
-print_cells_csv()
-save_3d_scatters()
+# print_cells_csv()
+# save_3d_scatters()
