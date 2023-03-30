@@ -1,6 +1,4 @@
 import numpy as np
-import math
-import csv
 import htm
 from htm.algorithms import SpatialPooler as SP
 from htm.algorithms import TemporalMemory as TM
@@ -17,8 +15,8 @@ class CorticalColumn:
     """
 
     def __init__(self, vision):
-        number_of_columns = 64
-        layer_depth = 16
+        self.column_width = 32
+        self.layer_depth = 8
 
         # region Encoders
 
@@ -111,16 +109,16 @@ class CorticalColumn:
 
         # region Spatial Pooler
 
-        self.L23_active_columns = SDR(number_of_columns)
-        self.L4_active_columns = SDR(number_of_columns)
-        self.L6a_active_columns = SDR(number_of_columns)
+        self.L23_active_columns = SDR(self.column_width)
+        self.L4_active_columns = SDR(self.column_width)
+        self.L6a_active_columns = SDR(self.column_width)
 
         # L23 object layer spatial pooler
         self.L23_sp = SP(
             # region L23_sp Parameters
-            inputDimensions=[number_of_columns*layer_depth],
-            columnDimensions=[number_of_columns],
-            potentialRadius=(number_of_columns*layer_depth),
+            inputDimensions=[self.column_width*self.layer_depth],
+            columnDimensions=[self.column_width],
+            potentialRadius=(self.column_width*self.layer_depth),
             potentialPct=.85,
             globalInhibition=True,
             localAreaDensity=8/256,
@@ -142,7 +140,7 @@ class CorticalColumn:
         self.L4_sp = SP(
             # region L4_sp Parameters
             inputDimensions=[self.vision_SDR.size],
-            columnDimensions=[number_of_columns],
+            columnDimensions=[self.column_width],
             potentialRadius=ray_encoding_width,
             potentialPct=.85,
             globalInhibition=True,
@@ -165,7 +163,7 @@ class CorticalColumn:
         self.L6a_sp = SP(
             # region L6a_sp Parameters
             inputDimensions=[self.movement_SDR.size],
-            columnDimensions=[number_of_columns],
+            columnDimensions=[self.column_width],
             potentialRadius=movement_encoding_width,
             potentialPct=.85,
             globalInhibition=True,
@@ -195,7 +193,7 @@ class CorticalColumn:
         self.L23_tm = TM(
             # region L23_tm Parameters
             columnDimensions=self.L23_sp.getColumnDimensions(),
-            cellsPerColumn=layer_depth,
+            cellsPerColumn=self.layer_depth,
             maxSegmentsPerCell=64,
             maxSynapsesPerSegment=32,
             maxNewSynapseCount=16,
@@ -206,7 +204,7 @@ class CorticalColumn:
             permanenceIncrement=0.1,
             permanenceDecrement=0.02,
             predictedSegmentDecrement=0.006,
-            externalPredictiveInputs=(number_of_columns * layer_depth),
+            externalPredictiveInputs=(self.column_width * self.layer_depth),
             checkInputs=1,
             seed=9,
             # endregion
@@ -216,7 +214,7 @@ class CorticalColumn:
         self.L4_tm = TM(
             # region L4_tm Parameters
             columnDimensions=self.L4_sp.getColumnDimensions(),
-            cellsPerColumn=layer_depth,
+            cellsPerColumn=self.layer_depth,
             maxSegmentsPerCell=64,
             maxSynapsesPerSegment=32,
             maxNewSynapseCount=16,
@@ -227,7 +225,7 @@ class CorticalColumn:
             permanenceIncrement=0.1,
             permanenceDecrement=0.02,
             predictedSegmentDecrement=0.01,
-            externalPredictiveInputs=(number_of_columns * layer_depth),
+            externalPredictiveInputs=(self.column_width * self.layer_depth),
             checkInputs=1,
             seed = 10,
             # endregion
@@ -237,7 +235,7 @@ class CorticalColumn:
         self.L6a_tm = TM(
             # region L6a_tm Parameters
             columnDimensions=self.L6a_sp.getColumnDimensions(),
-            cellsPerColumn=layer_depth,
+            cellsPerColumn=self.layer_depth,
             maxSegmentsPerCell=64,
             maxSynapsesPerSegment=32,
             maxNewSynapseCount=16,
@@ -248,7 +246,7 @@ class CorticalColumn:
             permanenceIncrement=0.1,
             permanenceDecrement=0.02,
             predictedSegmentDecrement=0.01,
-            externalPredictiveInputs=(number_of_columns * layer_depth),
+            externalPredictiveInputs=(self.column_width * self.layer_depth),
             checkInputs=1,
             seed = 11,
             # endregion
@@ -270,7 +268,7 @@ class CorticalColumn:
         for ray in vision:
 
             # Encode ray angles and feedback
-            ray_angle_SDR = self.ray_angle_encoder.encode(int(ray.degree_ego_angle))
+            ray_angle_SDR = self.ray_angle_encoder.encode(int(ray.ego_angle))
             ray_length_SDR = self.ray_color_encoder.encode(ray.color_num)
 
             # Create ray SDR whose size is the sum of the sizes of angle and feedback SDRs

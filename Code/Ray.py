@@ -1,6 +1,7 @@
 import pygame
 
 from helpers.collisions import *
+from helpers.geometry import *
 
 class Ray:
     """
@@ -14,24 +15,14 @@ class Ray:
         self.x1 = x
         self.y1 = y
 
-        self.degree_alloc_angle = alloc_angle
-        if alloc_angle>=360:
-            self.degree_alloc_angle-=360
-        if alloc_angle<0:
-            self.degree_alloc_angle+=360
-        self.alloc_angle = math.radians(self.degree_alloc_angle)
-
-        self.degree_ego_angle = ego_angle
-        if ego_angle>=360:
-            self.degree_ego_angle-=360
-        if ego_angle<0:
-            self.degree_ego_angle+=360
+        self.alloc_angle = normalize_angle(alloc_angle)
+        self.ego_angle = normalize_angle(ego_angle)
 
         self.length = 1
         self.max_length = max_length
 
-        self.x2 = self.x1 + self.length * math.cos(self.alloc_angle)
-        self.y2 = self.y1 + self.length * math.sin(self.alloc_angle)
+        self.x2 = self.x1 + self.length * math.cos(math.radians(self.alloc_angle))
+        self.y2 = self.y1 + self.length * math.sin(math.radians(self.alloc_angle))
 
         self.color = color
         self.color_num = 0
@@ -41,12 +32,7 @@ class Ray:
         """Function update takes in an x, y, and angle, and updates the ray to this position and orientation"""
         self.x1 = x
         self.y1 = y
-        self.degree_alloc_angle=alloc_angle
-        if alloc_angle>=360:
-            self.degree_alloc_angle-=360
-        if alloc_angle<0:
-            self.degree_alloc_angle+=360
-        self.alloc_angle = math.radians(alloc_angle)
+        self.alloc_angle = normalize_angle(alloc_angle)
 
         ray_collision(self, box)
 

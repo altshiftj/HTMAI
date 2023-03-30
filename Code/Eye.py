@@ -10,7 +10,6 @@ from helpers.encode_helper import *
 from Ray import *
 
 
-# number of rays in vision array
 class Eye:
     """
     Eye Class defines an array of rays cast out in an environment. Rays are cast out in a width range about
@@ -33,8 +32,8 @@ class Eye:
         self.direction = direction
 
         ang = 0
-        del_angle = int(self.field_of_view/(self.number_of_rays))
-        start = self.direction - int(self.field_of_view/2)
+        del_angle = self.field_of_view // self.number_of_rays
+        start = self.direction - self.field_of_view // 2
         while ang*del_angle<=self.field_of_view:
             self.vision.append(Ray(x, y, start+ang*del_angle, int(-self.field_of_view/2+ang*del_angle), max_vision))
             ang+=1

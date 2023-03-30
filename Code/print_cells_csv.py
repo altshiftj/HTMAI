@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-def print_cells_csv():
+def print_cells_csv(column_width, layer_depth):
     layers = [
         'L23',
         'L4',
@@ -26,7 +26,7 @@ def print_cells_csv():
 
         layer_data = df.loc[df['layer'] == f'{layers[l]}_{cell_type}']
 
-        for i in range(256):
-            j = i*32
+        for i in range(column_width*layer_depth):
+            j = i*layer_depth
             if not layer_data.loc[layer_data['cell'] == j].empty:
                 layer_data.loc[(layer_data['cell'] == j)].to_csv(f'{write_path}\cell{j}.csv')
