@@ -101,3 +101,9 @@ def move_collision(animal, wall, move_dir):
 
     return False
 
+def check_collision(animal, box):
+    for wall in box.walls:
+        collision = move_collision(animal, wall, True)
+        if collision:
+            return True
+    return False

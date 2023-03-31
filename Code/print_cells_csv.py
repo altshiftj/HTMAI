@@ -26,7 +26,7 @@ def print_cells_csv():
 
         layer_data = df.loc[df['layer'] == f'{layers[l]}_{cell_type}']
 
-        for i in range(256):
-            j = i*32
+        for i in range(32):
+            j = i*8
             if not layer_data.loc[layer_data['cell'] == j].empty:
                 layer_data.loc[(layer_data['cell'] == j)].to_csv(f'{write_path}\cell{j}.csv')

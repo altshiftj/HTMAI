@@ -17,8 +17,8 @@ class CorticalColumn:
     """
 
     def __init__(self, vision):
-        number_of_columns = 256
-        layer_depth = 32
+        number_of_columns = 32
+        layer_depth = 8
 
         # region Encoders
 

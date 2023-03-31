@@ -85,52 +85,35 @@ class Animal:
     def move(self, step_size_move, box, direction):
         """Function move takes in a step size (speed), environment, and forward or backward direction
         to define movement. Animal moves within the environment checking for collisions as it goes"""
-        if direction == 'forward':
 
-            for wall in box.walls:
-                collision = move_collision(self, wall, True)
-                if collision:
-                    break
+        if not check_collision(self, box):
+            self.l1_distance += step_size_move
+            self.x += step_size_move * math.cos(math.radians(self.head_direction))
+            self.y += step_size_move * math.sin(math.radians(self.head_direction))
 
-            if not collision:
-                self.linear_speed = step_size_move
-                self.l1_distance += step_size_move
-
-                self.x += step_size_move * math.cos(math.radians(self.head_direction))
-                self.y += step_size_move * math.sin(math.radians(self.head_direction))
-
-        if direction == 'backward':
-            for wall in box.walls:
-                collision = move_collision(self, wall, False)
-                if collision:
-                    break
-
-            if not collision:
-                self.linear_speed = -step_size_move
-                self.l1_distance -= step_size_move
-                self.x -= step_size_move * math.cos(math.radians(self.head_direction))
-                self.y -= step_size_move * math.sin(math.radians(self.head_direction))
+        return
 
 
     def turn(self, xdir, ydir):
-        theta = math.degrees(math.atan2(ydir,xdir))
-        if theta < 0:
-            theta+=360
+        """
+        Turn an object based on the input x and y directions.
+        Args:
+            xdir (float): X direction.
+            ydir (float): Y direction.
+        """
+        # Calculate the angle between the positive X-axis and the vector (xdir, ydir) in degrees
+        target_angle = math.degrees(math.atan2(ydir, xdir))
+        target_angle = normalize_angle(target_angle)
 
-        if abs((theta - self.head_direction))>180 and theta>self.head_direction:
-            self.angular_velocity += round(theta - (self.head_direction+360))
-        elif abs((theta - self.head_direction))>180 and theta<self.head_direction:
-            self.angular_velocity += round((theta+360) - self.head_direction)
-        else:
-            self.angular_velocity += round(theta - self.head_direction)
+        current_angle = self.head_direction
+        angle_difference = normalize_angle(target_angle - current_angle)
 
-        self.head_direction = round(theta)
+        if angle_difference > 180:
+            angle_difference -= 360
 
+        self.angular_velocity += round(angle_difference)
 
-        # if (self.head_direction + theta)>=360:
-        #     self.head_direction -= 360
-        # elif (self.head_direction + theta) < 0:
-        #     self.head_direction += 360
+        self.head_direction = round(target_angle)
 
         return
 

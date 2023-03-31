@@ -66,5 +66,8 @@ def find_intersect(ray, wall):
             return intersect_point
 
 
-def dot (x1,y1 , x2,y2):
-    pass
+def normalize_angle(angle):
+    """
+    Normalize an angle to the range [0, 360).
+    """
+    return angle % 360

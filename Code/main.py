@@ -33,8 +33,8 @@ screen_box = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(WINDOW_SIZE)
 running = True
 
-iterations = 4250
-record_iterations = 250
+iterations = 7500
+record_iterations = 2500
 start_recording = iterations - record_iterations
 count = 0
 
@@ -128,4 +128,4 @@ mouse.brain.cc1.L23_sp.saveToFile('objSP', 'BINARY')
 
 #create and save neural firing plots
 print_cells_csv()
-save_3d_scatters()
+#save_3d_scatters()
