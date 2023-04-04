@@ -5,22 +5,25 @@ from helpers.collisions import *
 
 class Animal:
     """
-    Animal class defines an object which can move and see in a given environment. Class Animal "sees" with an Eye object
-    which casts rays in an environment and encodes their distance and orientation into an SDR. Animal then interprets
-    this encoding using Class Brain, which inplements Spatial Pooling to learn patterns of movement and sensation, using
-    the learned patterns to decide on future movements.
+    A class representing an animal with vision and movement capabilities.
 
-    x - animal x-position
-    y - animal y-position
-    size - Animal size, that is drawn radius. Also important in collision calculations
-    head_direction - direction of movement and center of Animal vision (degrees)
-    field_of_view - angular width of Animal view
+    :param x_pos            (int): The x-coordinate of the animal's position.
+    :param y_pos            (int): The y-coordinate of the animal's position.
+    :param size             (int): The size of the animal.
+    :param head_direction   (float): The direction the animal's head is facing.
+    :param field_of_view    (float): The field of view of the animal's vision.
+    :param num_of_rays      (int): The number of rays used in the animal's vision.
+    :param speed            (int): The speed at which the animal moves.
+    :param thought_freq     (int): The frequency of the animal's thoughts.
+    :param cc_width         (int): The width of the animal's cortical column.
+    :param cc_layer_depth   (int): The depth of layers in the animal's cortical column.
+    :param color            (str, optional): The color of the animal. Defaults to 'black'.
     """
-    def __init__(self, x, y, size, head_direction, field_of_view, num_of_rays, color='black'):
-        self.x = x
-        self.y = y
-        self.l1_distance = 0
-        self.linear_speed = 0
+    def __init__(self, x_pos, y_pos, size, head_direction, field_of_view, num_of_rays, speed, thought_freq, cc_width, cc_layer_depth, color='black'):
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.distance_travelled = 0
+        self.speed = speed
         self.angular_velocity = 0
 
         self.size = size
@@ -28,68 +31,53 @@ class Animal:
         self.head_direction = head_direction
         self.field_of_view = field_of_view
 
-        self.eye = Eye(x, y, head_direction, field_of_view, size, 1200, num_of_rays)
-        self.brain = Brain(self.eye.vision)
+        self.eye = Eye(x_pos, y_pos, head_direction, field_of_view, size, 1600, num_of_rays)
+
+        self.brain = Brain(vision = self.eye.vision, learning = True, record_activity = False, cc_width = cc_width, cc_layer_depth = cc_layer_depth)
+        self.thought_freq = thought_freq
 
         self.color = color
 
 
     def look(self, box):
-        """Function look takes in an environment and looks at it using Eye at Animal x and y in head_direction"""
-        self.eye.see(box, self.x, self.y, self.head_direction)
+        """
+        Updates the animal's vision by having its eye see the given environment.
+
+        :param: box     (Box): The environment that the animal is in.
+        """
+        self.eye.see(box, self.x_pos, self.y_pos, self.head_direction)
 
 
-    def think(self, track, move_speed, thought_step, learning):
-        """Function think passes encoded Eye SDR to Brain for Spatial Pooling and Temporal Memory functions"""
+    def think(self):
+        """
+        Animal thinks and updates its state based on its current state.
+        """
+        # If the animal has not thought yet, initialize its brain
         if self.brain.thought_count == 0:
-            self.brain.initialize(self.eye.vision, self.l1_distance, self.linear_speed, self.angular_velocity)
+            self.brain.initialize(self.eye.vision, self.distance_travelled, self.speed, self.angular_velocity)
+        else:
+            # train the HTM network based on the current state
+            self.brain.think(self.x_pos, self.y_pos, self.head_direction, self.eye.vision, self.distance_travelled, self.speed, self.angular_velocity)
 
-        self.brain.think(self.eye.vision, self.l1_distance, self.linear_speed, self.angular_velocity, learning)
-
-        if track == 1:
-            self.record()
-
-        if self.l1_distance>5*move_speed*thought_step:
-            self.l1_distance = 0
+        # if distance travelled is greater than 4 times the speed, reset it. They cyclic nature of the distance travelled
+        # can be likened to the cyclic nature of limb movement.
+        if self.distance_travelled>4*self.speed:
+            self.distance_travelled = 0
 
         self.angular_velocity = 0
         return
 
-    def record(self):
-        write_activecell_to_csv(self.brain.cc1.L23_tm,
-                                'L23_active',
-                                self.brain.thought_count,
-                                int(self.x),
-                                int(self.y),
-                                int(self.head_direction),
-                                '-', '-')
 
-        write_activecell_to_csv(self.brain.cc1.L4_tm,
-                                'L4_active',
-                                self.brain.thought_count,
-                                int(self.x),
-                                int(self.y),
-                                int(self.head_direction),
-                                '-', '-')
+    def move(self, box):
+        """
+        Moves the animal in its current direction if there is no collision.
 
-        write_activecell_to_csv(self.brain.cc1.L6a_tm,
-                                'L6a_active',
-                                self.brain.thought_count,
-                                int(self.x),
-                                int(self.y),
-                                int(self.head_direction),
-                                self.linear_speed,
-                                self.angular_velocity)
-
-
-    def move(self, step_size_move, box, direction):
-        """Function move takes in a step size (speed), environment, and forward or backward direction
-        to define movement. Animal moves within the environment checking for collisions as it goes"""
-
+        :param box      (Box): The environment that the animal is in.
+        """
         if not check_collision(self, box):
-            self.l1_distance += step_size_move
-            self.x += step_size_move * math.cos(math.radians(self.head_direction))
-            self.y += step_size_move * math.sin(math.radians(self.head_direction))
+            self.distance_travelled += self.speed
+            self.x_pos += self.speed * math.cos(math.radians(self.head_direction))
+            self.y_pos += self.speed * math.sin(math.radians(self.head_direction))
 
         return
 
@@ -97,30 +85,28 @@ class Animal:
     def turn(self, xdir, ydir):
         """
         Turn an object based on the input x and y directions.
-        Args:
-            xdir (float): X direction.
-            ydir (float): Y direction.
+
+        :param xdir     (float): X direction.
+        :param ydir     (float): Y direction.
         """
         # Calculate the angle between the positive X-axis and the vector (xdir, ydir) in degrees
-        target_angle = math.degrees(math.atan2(ydir, xdir))
-        target_angle = normalize_angle(target_angle)
+        target_angle = normalize_angle_0_360(math.degrees(math.atan2(ydir, xdir)))
 
         current_angle = self.head_direction
-        angle_difference = normalize_angle(target_angle - current_angle)
 
-        if angle_difference > 180:
-            angle_difference -= 360
+        # Calculate the angle difference between the target angle and the current angle
+        angle_difference = normalize_angle_neg180_180(target_angle - current_angle)
 
         self.angular_velocity += round(angle_difference)
-
         self.head_direction = round(target_angle)
 
         return
 
 
     def draw(self, display):
-        """Function draw takes in a display to be drawn onto. Animal is draw at size,
-        and casted rays from the eye are drawn as well"""
+        """
+        Draws the animal and its vision on the given display.
+        """
         self.eye.draw(display)
-        pygame.draw.circle(display, self.color, (self.x, self.y), self.size, 5)
-        pygame.draw.circle(display, 'white', (self.x, self.y), self.size-5)
+        pygame.draw.circle(display, self.color, (self.x_pos, self.y_pos), self.size, 5)
+        pygame.draw.circle(display, 'white', (self.x_pos, self.y_pos), self.size - 5)

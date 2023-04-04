@@ -1,12 +1,15 @@
-from pygame.locals import *             # import for quit
-from perlin_noise import PerlinNoise    #
+from pygame.locals import *
+from perlin_noise import PerlinNoise
+from pathlib import Path
 import matplotlib
+import pygame.font
 
 matplotlib.use("TkAgg")
 
 from helpers.display_temp_mem import *
-from helpers.save_3d_scatters import *
-from Code.print_cells_csv import *
+#from helpers.save_3d_scatters import *
+#from Code.helpers.print_cells_csv import *
+from helpers.neural_activity_read_write import sort_cell_activity, save_3d_scatters
 
 plt.ion()
 
@@ -16,36 +19,42 @@ from Animal import *
 """
 Purpose of main is to manage the relationship between class Box and Animal, as well as implement pygame display
 """
+
+# define the length of training and how long to record neural activity
+ITERATIONS = 5000
+RECORD_ITERATIONS = 50; assert RECORD_ITERATIONS < ITERATIONS
+BEGIN_RECORDING = ITERATIONS - RECORD_ITERATIONS
+count = 0
+
 #instantiate Box
-box = Box(1600,1600)
+box = Box(800,800)
 
 #instantiate Animal
-mouse = Animal(400,800,20,0,60,10)
-learning = True
-mouse_speed = 5
-thought_step = 10
-track = -1
+mouse = Animal(x_pos = 200,
+               y_pos = 400,
+               size = 20,
+               head_direction = 0,
+               field_of_view = 60,
+               num_of_rays = 11,
+               speed = 5,
+               thought_freq = 10,
+               cc_width = 32,
+               cc_layer_depth = 4,)
 
-#instantiate pygame environment
+# region Autoturn: Generate a set of random directions for the animal to travel in
+noisex = PerlinNoise(octaves=2)
+noisey = PerlinNoise(octaves=3)
+perlin = [i * 0.001 for i in range(ITERATIONS)]
+xdir = [noisex(i) for i in perlin]
+ydir = [noisey(i) for i in perlin]
+# endregion
+
+#initialize pygame environment
 pygame.init()
 WINDOW_SIZE = (box.width,box.height)
 screen_box = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(WINDOW_SIZE)
 running = True
-
-iterations = 7500
-record_iterations = 2500
-start_recording = iterations - record_iterations
-count = 0
-
-# region Autoturn
-noisex = PerlinNoise(octaves=2)
-noisey = PerlinNoise(octaves=3)
-perlin = [i*0.001 for i in range(iterations)]
-xdir = [noisex(i) for i in perlin]
-ydir = [noisey(i) for i in perlin]
-# endregion
-
 
 def draw():
     """
@@ -60,6 +69,10 @@ def draw():
     # draw Animal, including casted vision rays
     mouse.draw(display)
 
+    font = pygame.font.Font(None, 36)
+    text = font.render(f"Count: {count}", 1, (0, 0, 0))
+    display.blit(text, (10, 10))
+
     # draw image
     screen_box.blit(display, (0, 0))
 
@@ -68,8 +81,8 @@ def draw():
 
 
 # to do while running pygame
-while count<iterations - 1:
-    # Animal actions, i.e. look and move.
+while count<ITERATIONS - 1:
+    # Capture keystroke events
     keys = pygame.key.get_pressed()
 
     # Display neural activity
@@ -91,9 +104,6 @@ while count<iterations - 1:
     if keys[pygame.K_y]:
         display_active_freq(mouse.brain.cc1.L6a_tm, mouse.brain.cc1.L6a_tm_info)
 
-    if keys[pygame.K_r]:
-        track *= -1
-
     #capture events in pygame i.e. exit, keystrokes, etc.
     for event in pygame.event.get():
 
@@ -102,30 +112,38 @@ while count<iterations - 1:
             sys.exit()
             pygame.quit()
 
-    # draw all shapes/images
-    draw()
-
+    # update the mouse position and direction
     mouse.turn(xdir[count], ydir[count])
-    mouse.move(mouse_speed, box, 'forward')
+    mouse.move(box)
+
+    # cast vision rays at new position
     mouse.look(box)
 
-    if count%thought_step==0:
-        mouse.think(track, mouse_speed, thought_step, learning)
+    # train the HTM network every thought_freq iteration
+    if count % mouse.thought_freq==0:
+        mouse.think()
 
-    if count == start_recording:
-        track *= -1
-        learning = False
+    # stop learning and start recording neural activity
+    if count == BEGIN_RECORDING:
+        mouse.brain.stop_learning()
+        mouse.brain.start_recording()
+
+
+    # draw all shapes/images
+    draw()
 
     count+=1
 
 #save HTM files
-mouse.brain.cc1.L6a_tm.saveToFile('locTM', 'BINARY')
-mouse.brain.cc1.L6a_sp.saveToFile('locSP', 'BINARY')
-mouse.brain.cc1.L4_tm.saveToFile('senTM', 'BINARY')
-mouse.brain.cc1.L4_sp.saveToFile('senSP', 'BINARY')
-mouse.brain.cc1.L23_tm.saveToFile('objTM', 'BINARY')
-mouse.brain.cc1.L23_sp.saveToFile('objSP', 'BINARY')
+layer_path = Path(__file__).parent.parent / 'Output/Saved_Networks'
+layer_path.mkdir(parents=True, exist_ok=True)
+mouse.brain.cc1.L6a_tm.saveToFile(f'{layer_path}/locTM', 'BINARY')
+mouse.brain.cc1.L6a_sp.saveToFile(f'{layer_path}/locSP', 'BINARY')
+mouse.brain.cc1.L4_tm.saveToFile(f'{layer_path}/senTM', 'BINARY')
+mouse.brain.cc1.L4_sp.saveToFile(f'{layer_path}/senSP', 'BINARY')
+mouse.brain.cc1.L23_tm.saveToFile(f'{layer_path}/objTM', 'BINARY')
+mouse.brain.cc1.L23_sp.saveToFile(f'{layer_path}/objSP', 'BINARY')
 
 #create and save neural firing plots
-print_cells_csv()
-#save_3d_scatters()
+sort_cell_activity(mouse.brain.cc1.column_width, mouse.brain.cc1.layer_depth)
+save_3d_scatters(box.height, box.width, mouse.brain.cc1.column_width, mouse.brain.cc1.layer_depth)

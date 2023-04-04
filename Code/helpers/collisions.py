@@ -7,103 +7,119 @@ Collision helper is a collection of mathematical functions used to calculate col
 """
 def ray_collision(ray, box):
     """
-    Function ray_collision takes in a Ray and Box and calculates shortest collision between a Ray and Walls in Box
+    Calculates the shortest collision distance between a Ray object and the walls contained in a Box object.
+
+    :param ray      (Ray): The Ray object to calculate collisions for.
+    :param box      (Box): The Box object containing the walls to check for collisions against.
+    :return Ray:    The updated Ray object, including the closest intersection point with a wall and the corresponding wall color.
     """
 
-    # initial closest point is the max length within box
-    closest = math.sqrt(box.width*box.width + box.height*box.height)
+    # Initialize closest to the maximum possible distance within the box
+    closest = math.sqrt(box.width ** 2 + box.height ** 2)
 
-    # find all intersections between ray and walls. Set ray length to shortest collision distance
+    # Iterate over all walls in the box, checking for intersections with the ray
     for wall in box.walls:
         intersect_point = find_intersect(ray, wall)
         if intersect_point is not None:
+            # If an intersection is found, update the ray length and closest intersection point
             ray.length = int(dist(ray.x1, ray.y1, intersect_point[0], intersect_point[1]))
-            if (ray.length < closest):
+            # If this collision is closer than previous collisions, it is now the closest. Update the color of the ray
+            if ray.length < closest:
                 closest = int(ray.length)
                 ray.color = wall.color
                 ray.color_num = wall.color_num
-    if ray.max_length<closest:
+
+    # If no intersections were found, set the ray length to its maximum length
+    if ray.max_length < closest:
         ray.length = ray.max_length
         ray.color = 'black'
         ray.color_num = 0
-    ray.x2 = ray.x1 + ray.length * math.cos(ray.alloc_angle)
-    ray.y2 = ray.y1 + ray.length * math.sin(ray.alloc_angle)
-    return
+
+    # Update the end point of the ray based on the new length and angle
+    ray.x2 = ray.x1 + ray.length * math.cos(math.radians(ray.alloc_angle))
+    ray.y2 = ray.y1 + ray.length * math.sin(math.radians(ray.alloc_angle))
+
+    # Return the updated Ray object
+    return ray
 
 
-def move_collision(animal, wall, move_dir):
+def move_collision(animal, wall):
     """
-    Function move_collision takes in Animal, Wall, and move direction (backward or forward), then calculates
-    whether or not continuing to move constitutes a collision between Wall and Animal
+    Checks for collisions between an Animal object and a Wall object.
+
+    :param animal   (Animal): The Animal object to check for collisions against the wall.
+    :param wall     (Wall): The Wall object to check for collisions against the animal.
+    :return bool:   True if a collision is found, False otherwise.
     """
 
-    # wall position and length
-    w_x1 = wall.x1
-    w_y1 = wall.y1
-    w_x2 = wall.x2
-    w_y2 = wall.y2
-    w_length = wall.length
+    # Function to calculate the next position of the animal
+    def next_position(animal, distance_multiplier):
+        x_next = animal.x_pos + distance_multiplier * math.cos(math.radians(animal.head_direction))
+        y_next = animal.y_pos + distance_multiplier * math.sin(math.radians(animal.head_direction))
+        return x_next, y_next
 
-    # animal position and size
-    a_x = animal.x
-    a_y = animal.y
-    a_radius = animal.size
+    # Function to check if there is a collision between the animal and the wall
+    def is_collision(dist_current, dist_next, a_radius):
+        return a_radius >= dist_current > dist_next
 
-    # animals next potential moves, forward and backward
-    a_x_next_forward = a_x + 0.1 * math.cos(math.radians(animal.head_direction))
-    a_y_next_forward = a_y + 0.1 * math.sin(math.radians(animal.head_direction))
-    a_x_next_back = a_x - 0.1 * math.cos(math.radians(animal.head_direction))
-    a_y_next_back = a_y - 0.1 * math.sin(math.radians(animal.head_direction))
+    # Function to check if the distance between the animal and the closest point of the wall is within the wall buffer
+    def is_within_wall_buffer(dist1, dist2, w_length, buffer):
+        return w_length - buffer <= dist1 + dist2 <= w_length + buffer
 
-    # a buffer zone around wall end points
-    buffer = a_radius
+    # Calculate the next position of the animal by moving it forward by 0.1 distance multiplier
+    a_x_next_forward, a_y_next_forward = next_position(animal, 0.1)
+    buffer = 0
 
-    # Distance from animal to wall start and end points
-    dist_2_w1 = dist(a_x,a_y , w_x1,w_y1)
-    dist_2_w2 = dist(a_x,a_y , w_x2,w_y2)
+    # Calculate the distance between the animal and the two endpoints of the wall (current and next position)
+    dist_w1_current = dist(animal.x_pos, animal.y_pos, wall.x1, wall.y1)
+    dist_w2_current = dist(animal.x_pos, animal.y_pos, wall.x2, wall.y2)
+    dist_w1_next = dist(a_x_next_forward, a_y_next_forward, wall.x1, wall.y1)
+    dist_w2_next = dist(a_x_next_forward, a_y_next_forward, wall.x2, wall.y2)
 
-    # Distance from animal to wall start point at next timestep
-    dist_2_w1_next = dist(a_x_next_forward,a_y_next_forward , w_x1,w_y1)
-    dist_2_w2_next = dist(a_x_next_forward,a_y_next_forward , w_x2,w_y2)
-
-    # if animal is at or closer to wall endpoints than its size, and if its next move brings it even closer,
-    # a collision is detected. If the next move takes animal further away, no collision is detected.
-    if (a_radius >= dist_2_w1 > dist_2_w1_next) or (a_radius >= dist_2_w2 > dist_2_w2_next):
+    # Check if there is a collision between the animal and the wall at the current and next positions
+    if is_collision(dist_w1_current, dist_w1_next, animal.size) or is_collision(dist_w2_current, dist_w2_next,
+                                                                                animal.size):
         return True
 
-    # calculate a point that intersects the wall and a vector normal to animal position
-    dot = ( ((a_x-w_x1)*(w_x2-w_x1)) + ((a_y-w_y1)*(w_y2-w_y1)) ) / (w_length * w_length)
-    x_closest = w_x1 + (dot * (w_x2-w_x1))
-    y_closest = w_y1 + (dot * (w_y2-w_y1))
+    # Calculate the distance between the animal and the closest point of the wall
+    dot = (((animal.x_pos - wall.x1) * (wall.x2 - wall.x1)) + ((animal.y_pos - wall.y1) * (wall.y2 - wall.y1))) / (
+                wall.length ** 2)
+    x_closest = wall.x1 + (dot * (wall.x2 - wall.x1))
+    y_closest = wall.y1 + (dot * (wall.y2 - wall.y1))
 
-    # distance from this point to wall endpoints
-    dot_dist1 = dist(x_closest,y_closest , w_x1,w_y1)
-    dot_dist2 = dist(x_closest,y_closest , w_x2,w_y2)
+    # Calculate the distances between the closest point of the wall and the two endpoints of the wall
+    dot_dist1 = dist(x_closest, y_closest, wall.x1, wall.y1)
+    dot_dist2 = dist(x_closest, y_closest, wall.x2, wall.y2)
 
-    # If the point of closest distance between animal and wall is outside the endpoints of the wall, 
-    # there is no collision
-    if not w_length-buffer <= dot_dist1+dot_dist2 <= w_length+buffer:
+    # Check if the distance between the animal and the closest point of the wall is within the wall buffer
+    if not is_within_wall_buffer(dot_dist1, dot_dist2, wall.length, buffer):
         return False
 
-    # calculate distance from animal to the nearest wall point
-    adist = dist(x_closest,y_closest , a_x,a_y)
+    # Calculate the distance between the animal and the closest point of the wall at the current and next positions
+    adist_current = dist(x_closest, y_closest, animal.x_pos, animal.y_pos)
+    adist_next_forward = dist(x_closest, y_closest, a_x_next_forward, a_y_next_forward)
 
-    # calculate this distance at next time step
-    adist_next_forward = dist(x_closest,y_closest , a_x_next_forward,a_y_next_forward)
-    adist_next_back = dist(x_closest, y_closest , a_x_next_back, a_y_next_back)
-
-    # if animal is at or closer to wall than its size, and if its next move brings it even closer,
-    # a collision is detected. If the next move takes animal further away, no collision is detected.
-    if a_radius >= adist > adist_next_forward and move_dir:
-        return True
-    elif a_radius >= adist > adist_next_back and not move_dir:
+    # Check if there is a collision between the animal and the wall at the closest point at the current and next positions
+    if is_collision(adist_current, adist_next_forward, animal.size):
         return True
 
     return False
 
 def check_collision(animal, box):
+    """
+    Checks for collisions between an Animal object and the walls contained in a Box object.
+
+    :param animal   (Animal): The Animal object to check for collisions against walls.
+    :param box      (Box): The Box object containing the walls to check for collisions against.
+    :return bool:   True if a collision is found, False otherwise.
+    """
+
+    # Iterate over all walls in the box, checking for collisions with the animal
     for wall in box.walls:
-        collision = move_collision(animal, wall, True)
+        collision = move_collision(animal, wall)
         if collision:
+            # If a collision is found, return True to indicate that a collision occurred
             return True
+
+    # If no collisions are found, return False
     return False

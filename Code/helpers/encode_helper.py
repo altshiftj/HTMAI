@@ -12,7 +12,9 @@ def scalar_encoder_parameters(
                               size,
                               sparsity
                             ):
-
+    """
+    A helper function to encapsulate the parameters of an encoder.
+    """
     parameters = e.ScalarEncoderParameters()
 
     parameters.activeBits   = active_bits
@@ -30,6 +32,9 @@ def scalar_encoder_parameters(
 
 
 def scalar_encoder(parameters):
+    """
+    Creates a ScalarEncoder object with the given parameters.
+    """
     scalar_encoder = e.ScalarEncoder(parameters)
 
     return scalar_encoder
@@ -44,7 +49,9 @@ def rdse_encoder_parameters(
                             size,
                             sparsity
                            ):
-
+    """
+    A helper function to encapsulate the parameters of an RDSE encoder.
+    """
     parameters = e.RDSE_Parameters()
 
     parameters.activeBits   = active_bits
@@ -59,6 +66,9 @@ def rdse_encoder_parameters(
 
 
 def rdse_encoder(parameters):
+    """
+    Creates a RDSE object with the given parameters.
+    """
     rdse_encoder = e.RDSE(parameters)
 
     return rdse_encoder
