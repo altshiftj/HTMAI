@@ -21,13 +21,13 @@ Purpose of main is to manage the relationship between class Box and Animal, as w
 """
 
 # define the length of training and how long to record neural activity
-ITERATIONS = 5000
-RECORD_ITERATIONS = 50; assert RECORD_ITERATIONS < ITERATIONS
+ITERATIONS = 4000000
+RECORD_ITERATIONS = 100000; assert RECORD_ITERATIONS < ITERATIONS
 BEGIN_RECORDING = ITERATIONS - RECORD_ITERATIONS
 count = 0
 
 #instantiate Box
-box = Box(800,800)
+box = Box(1024,1024)
 
 #instantiate Animal
 mouse = Animal(x_pos = 200,
@@ -38,13 +38,16 @@ mouse = Animal(x_pos = 200,
                num_of_rays = 11,
                speed = 5,
                thought_freq = 10,
-               cc_width = 32,
-               cc_layer_depth = 4,)
+               cc_width = 64,
+               cc_layer_depth = 32,)
 
 # region Autoturn: Generate a set of random directions for the animal to travel in
+# NOTE: Changing noise scale will affect the sporadic nature of the turns. A higher noise scale will result in more
+#       sporadic turns.
 noisex = PerlinNoise(octaves=2)
 noisey = PerlinNoise(octaves=3)
-perlin = [i * 0.001 for i in range(ITERATIONS)]
+NOISE_SCALE = 0.0025
+perlin = [i * NOISE_SCALE for i in range(ITERATIONS)]
 xdir = [noisex(i) for i in perlin]
 ydir = [noisey(i) for i in perlin]
 # endregion

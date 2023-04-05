@@ -3,8 +3,17 @@ import math
 from helpers.geometry import *
 
 """
-Collision helper is a collection of mathematical functions used to calculate collisions between objects
+This script contains functions for detecting collisions between rays and walls, as well as between animals and walls.
+
+Functions
+- ray_collision: Determines the shortest collision distance between a Ray object and the walls in a Box object,
+                 updating the Ray object with the closest intersection point and corresponding wall color.
+- move_collision: Checks for collisions between an Animal object and a Wall object, returning True if a collision is found,
+                  and False otherwise.
+- check_collision: Checks for collisions between an Animal object and the walls contained in a Box object, returning True
+                   if a collision is found, and False otherwise.
 """
+
 def ray_collision(ray, box):
     """
     Calculates the shortest collision distance between a Ray object and the walls contained in a Box object.

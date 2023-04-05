@@ -9,8 +9,6 @@ from helpers.encode_helper import *
 
 from Ray import *
 
-
-# number of rays in vision array
 class Eye:
     """
     Eye Class defines an array of rays cast out in an environment. Rays are cast out in a width range about

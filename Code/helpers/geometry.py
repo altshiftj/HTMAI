@@ -1,8 +1,17 @@
 import math
 
 """
-Geometry helper is a place to define basic geometric operations that are often used.
+This script contains utility functions for calculating distances, finding intersections, and normalizing angles in a 2D space.
+
+Functions:
+- dist: Calculates the distance between two 2D points (x1, y1) and (x2, y2) using the Euclidean distance formula.
+- find_intersect: Finds the intersection point between a Ray object and a Wall object, represented as 2D line segments, 
+                  if it exists. Returns the intersection point as a tuple (x, y) if it exists, else None.
+- normalize_angle_0_360: Normalizes an angle to the range [0, 360) by taking the modulo 360 of the input angle.
+- normalize_angle_neg180_180: Normalizes an angle to the range [-180, 180) by taking the modulo 360 of the input angle
+                              and adjusting it if it is equal to or greater than 180.
 """
+
 def dist(x1,y1 , x2,y2):
     """Function dist calculates the distance between two 2-D points"""
     dx = x1 - x2

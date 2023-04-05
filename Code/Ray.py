@@ -5,7 +5,7 @@ from helpers.geometry import *
 
 class Ray:
     """
-    A Ray object representing a line segment with position, orientation, and length.
+    Class Ray represents a line segment with position, orientation, and length.
 
     The ray's position and orientation are updated based on the ray caster's position,
     head direction, and obstacle positions in the environment.

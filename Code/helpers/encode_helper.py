@@ -1,5 +1,18 @@
 import htm.bindings.encoders as e
 
+"""
+This script provides utility functions for creating and configuring scalar encoders and 
+randomly distributed scalar encoders (RDSE) for the Hierarchical Temporal Memory (HTM) algorithm.
+
+Functions:
+- scalar_encoder_parameters: A helper function to encapsulate the parameters of a scalar encoder, returning a 
+                             ScalarEncoderParameters object.
+- scalar_encoder: Creates a ScalarEncoder object with the given ScalarEncoderParameters object.
+- rdse_encoder_parameters: A helper function to encapsulate the parameters of an RDSE encoder, returning an 
+                           RDSE_Parameters object.
+- rdse_encoder: Creates an RDSE object with the given RDSE_Parameters object.
+"""
+
 def scalar_encoder_parameters(
                               active_bits,
                               category,

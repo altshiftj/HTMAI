@@ -4,7 +4,14 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import RangeSlider
 from pathlib import Path
 
-CELL_NUMBER = 64
+"""
+This script visualizes the activation of a specific cell within a cortical layer based on its position and 
+head direction. The script reads a CSV file containing the activation data, creates a scatter plot of the 
+X and Y positions, and provides a range slider to filter the head direction. 
+The plot updates in real-time as the slider values change.
+"""
+
+CELL_NUMBER = 608
 LAYER = 'L4'
 CELL_TYPE = 'Active'
 DPI = 100

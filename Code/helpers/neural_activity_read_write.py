@@ -9,6 +9,19 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
+"""
+This script processes and visualizes cell activity data from cortical column layers in the HTM 
+(Hierarchical Temporal Memory) model. It reads the cell activation data from a CSV file, organizes and saves the data 
+by layer and cell number, and generates 3D scatter plots of the cell activations for different orientations 
+(3D, XY, XZ, YZ planes).
+
+Functions:
+- initialize_output(): Initializes the CSV output file with a header.
+- write_active_cells_to_csv(): Writes active cell data to a CSV file.
+- sort_cell_activity(): Sorts and saves cell activity data by layer and cell number.
+- save_3d_scatters(): Creates 3D scatter plots and saves them as PNG files.
+"""
+
 base_directory = Path(__file__).parent.parent.parent
 folder_path = base_directory / "Output"
 file_path = folder_path / "active_cells.csv"
@@ -105,7 +118,7 @@ def save_3d_scatters(box_height, box_width, column_width, layer_depth):
     """
 
     # initialize figure properties
-    fig = plt.figure(figsize=[6,5], layout='tight')
+    fig = plt.figure(figsize=[6,5])
     dpi = 100
 
     # lower limit for the file size of the csv files to be plotted
@@ -174,14 +187,10 @@ def save_3d_scatters(box_height, box_width, column_width, layer_depth):
                     colmap.set_array(z)
 
                     # Set up the plot settings for the 3D plot
-                    epsilon = 1e-8
-                    z_max = np.nanmax(z)
-                    if z_max == 0:
-                        z_max = epsilon
                     img = ax.scatter(x, y, z, c=cm.plasma(z / max(z)), marker='o', s=6)
 
                     # Add a color bar to the plot
-                    cb = fig.colorbar(colmap, fraction=0.033)
+                    cb = fig.colorbar(colmap, ax=ax, fraction=0.033)
                     cb.set_label('Head Direction (\N{DEGREE SIGN})')
 
                     # Add axis labels and tick marks to the plot
@@ -196,6 +205,7 @@ def save_3d_scatters(box_height, box_width, column_width, layer_depth):
                         # Case 0: Default 3D plot
                         case 0:
                             ax.set_zlabel('')
+                            plt.tight_layout()
                             plt.savefig(write_file_3d, dpi=dpi)
                             plt.clf()
 
@@ -204,6 +214,7 @@ def save_3d_scatters(box_height, box_width, column_width, layer_depth):
                             ax.view_init(-90, -90)  # xy
                             ax.set_zticks([])
                             ax.set_zlabel('')
+                            plt.tight_layout()
                             plt.savefig(write_file_xy, dpi=dpi)
                             plt.clf()
 
@@ -213,6 +224,7 @@ def save_3d_scatters(box_height, box_width, column_width, layer_depth):
                             ax.set_yticks([])
                             ax.set_ylabel('')
                             ax.set_zlabel('')
+                            plt.tight_layout()
                             plt.savefig(write_file_xz, dpi=dpi)
                             plt.clf()
 
@@ -221,5 +233,6 @@ def save_3d_scatters(box_height, box_width, column_width, layer_depth):
                             ax.view_init(0, 0)  # yz
                             ax.set_xticks([])
                             ax.set_xlabel('')
+                            plt.tight_layout()
                             plt.savefig(write_file_yz, dpi=dpi)
                             plt.clf()

@@ -6,6 +6,17 @@ matplotlib.use("TkAgg")
 plt.ion()
 figure = plt.figure()
 
+"""
+This script provides functions for visualizing active cells and their activation frequencies for a given 
+temporal memory (TM) layer within a cortical column using scatter plots.
+
+Functions:
+- initialize_display: Initializes the grid for displaying active cells or activation frequencies of a given TM layer.
+- display: Receives a grid of active cells or activation frequencies and displays them on a scatter plot.
+- display_active_cells: Displays the active cells of a given temporal memory layer.
+- display_active_freq: Displays the activation frequency of cells in a given temporal memory layer.
+"""
+
 
 def initialize_display(tm, tm_info):
     """

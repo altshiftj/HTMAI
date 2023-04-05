@@ -11,14 +11,12 @@ from CorticalColumn import *
 from Code.helpers.neural_activity_read_write import initialize_output, write_active_cells_to_csv
 
 class Brain:
-    """
-    Class Brain defines an object which takes encoded SDRs from sensory objects
-    and carries out the operation of Spatial Pooling on the SDR. Further implementation to be determined
-    (i.e. neuron interconnections, minicolumns, temporal memory, converting SDR input into motor outputs, etc)
-    """
+
     def __init__(self, vision, learning, record_activity, cc_width, cc_layer_depth):
         """
-        Initializes a Brain object with the following properties:
+        Class Brain defines an object which takes encoded SDRs from sensory objects
+        and carries out the operation of Spatial Pooling on the SDR. Further implementation to be determined
+        (i.e. neuron interconnections, minicolumns, temporal memory, converting SDR input into motor outputs, etc)
 
         :param vision           (list): a list of rays representing the animal's vision
         :param learning         (bool): indicates whether the Brain is in learning mode
