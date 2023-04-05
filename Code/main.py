@@ -21,13 +21,13 @@ Purpose of main is to manage the relationship between class Box and Animal, as w
 """
 
 # define the length of training and how long to record neural activity
-ITERATIONS = 4000000
-RECORD_ITERATIONS = 100000; assert RECORD_ITERATIONS < ITERATIONS
+ITERATIONS = 4000
+RECORD_ITERATIONS = 100; assert RECORD_ITERATIONS < ITERATIONS
 BEGIN_RECORDING = ITERATIONS - RECORD_ITERATIONS
 count = 0
 
 #instantiate Box
-box = Box(1024,1024)
+box = Box(width = 1024, height = 1024)
 
 #instantiate Animal
 mouse = Animal(x_pos = 200,
