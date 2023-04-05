@@ -111,7 +111,7 @@ class CorticalColumn:
         self.speed_encoder = rdse_encoder(speed_enc_param)
         self.angular_velocity_encoder = rdse_encoder(angular_velocity_enc_param)
         
-        self.motion_enc_info = Metrics([self.movement_SDR.size], 999999999)
+        self.movement_enc_info = Metrics([self.movement_SDR.size], 999999999)
         # endregion
 
         # region Spatial Pooler
@@ -280,13 +280,13 @@ class CorticalColumn:
 
             # Encode ray angles and feedback
             ray_angle_SDR = self.ray_angle_encoder.encode(int(ray.ego_angle))
-            ray_length_SDR = self.ray_feedback_encoder.encode(ray.color_num)
+            ray_feedback_SDR = self.ray_feedback_encoder.encode(ray.color_num)
 
             # Create ray SDR whose size is the sum of the sizes of angle and feedback SDRs
             ray_SDR = htm.SDR(ray_angle_SDR.size)
 
             # Make ray SDR represent both ray angle and feedback via concatentation
-            ray_SDR.union(ray_length_SDR, ray_angle_SDR)
+            ray_SDR.union(ray_feedback_SDR, ray_angle_SDR)
 
             # Add ray SDR to list of SDRs representing vision
             self.encoded_vision.append(ray_SDR)
@@ -314,18 +314,18 @@ class CorticalColumn:
         self.encoded_movement.append(distance_traveled_SDR)
 
         # Create an SDR the of encoded distance moved
-        linear_move_SDR = self.speed_encoder.encode(speed)
-        self.encoded_movement.append(linear_move_SDR)
+        speed_SDR = self.speed_encoder.encode(speed)
+        self.encoded_movement.append(speed_SDR)
 
         # Create an SDR the of encoded change in head direction
-        angular_move_SDR = self.angular_velocity_encoder.encode(angular_velocity)
-        self.encoded_movement.append(angular_move_SDR)
+        angular_velocity_SDR = self.angular_velocity_encoder.encode(angular_velocity)
+        self.encoded_movement.append(angular_velocity_SDR)
 
         # Make movement SDR a union of move and head direction SDRs
         self.movement_SDR.union(self.encoded_movement)
 
         # Record metrics of the movement SDR
-        self.motion_enc_info.addData(self.movement_SDR)
+        self.movement_enc_info.addData(self.movement_SDR)
 
         return
 
