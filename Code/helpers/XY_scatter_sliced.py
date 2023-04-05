@@ -1,40 +1,55 @@
+import os
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.widgets import RangeSlider
-import pandas
-import os
+from pathlib import Path
 
+"""
+This script visualizes the activation of a specific cell within a cortical layer based on its position and 
+head direction. The script reads a CSV file containing the activation data, creates a scatter plot of the 
+X and Y positions, and provides a range slider to filter the head direction. 
+The plot updates in real-time as the slider values change.
+"""
 
-cell_number = 7520
-layer = 'L23'
-cell_type = 'Active'
-dpi = 100
+CELL_NUMBER = 608
+LAYER = 'L4'
+CELL_TYPE = 'Active'
+DPI = 100
 
-read_path = f'C:\Environments\HTMAI Output\\{layer}_{cell_type}\cell{cell_number}.csv'
+# Construct the file path
+base_directory = Path(__file__).parent.parent.parent
+folder_path = base_directory / "Output"
+read_path =  folder_path / f'Layer Activity\\{LAYER}_{CELL_TYPE}\\cell{CELL_NUMBER}.csv'
 
-read_path_exist = os.path.exists(read_path)
-
+# Check if the file exists, read the CSV file
 if os.path.exists(read_path):
-    df = pandas.read_csv(read_path)
+    df = pd.read_csv(read_path)
 else:
-    print(f'No cell {cell_number} file')
+    print(f'No cell {CELL_NUMBER} file')
     exit()
 
-fig = plt.figure(dpi=dpi)
-fig.suptitle(f'Layer {layer}: Cell {cell_number} Activation')
+# Create the figure and set its title
+fig = plt.figure(dpi=DPI)
+fig.suptitle(f'Layer {LAYER}: Cell {CELL_NUMBER} Activation')
 
+# Extract the x, y, and head direction values from the DataFrame
 x = df['x'].values
 y = df['y'].values
 z = df['head direction'].values
 
+# Set the x and y axis labels
 plt.xlabel('X Position', fontsize='small')
 plt.ylabel('Y Position')
 
+# Create the scatter plot and invert the y-axis
 scatter, = plt.plot(x, y, 'bo', markersize=2)
 plt.gca().invert_yaxis()
 
+# Create the range slider for head direction
 slider_ax = plt.axes([0.20, 0.015, 0.60, 0.015])
-slider = RangeSlider(slider_ax, "Head Direction", 0, 360, (0,360), valstep=10)
+slider = RangeSlider(slider_ax, "Head Direction", 0, 360, (0, 360), valstep=10)
 
+# Update the scatter plot based on the range slider values
 def update(val):
     df_new = df.loc[(df['head direction'] >= slider.val[0]) & (df['head direction'] <= slider.val[1])]
     x = df_new['x'].values
@@ -45,5 +60,6 @@ def update(val):
 
     fig.canvas.draw_idle()
 
+# Add the update function to the range slider
 slider.on_changed(update)
 plt.show()

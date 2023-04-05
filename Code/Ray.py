@@ -1,56 +1,56 @@
 import pygame
 
 from helpers.collisions import *
+from helpers.geometry import *
 
 class Ray:
     """
-    Class Ray defines an object with position, orientation, and length. These values are updated based on
-    ray caster position and head direction, in conjunction with obstacle positions in the environment
-    x - x-position
-    y - y-position
-    angle = orientation (degrees)
+    Class Ray represents a line segment with position, orientation, and length.
+
+    The ray's position and orientation are updated based on the ray caster's position,
+    head direction, and obstacle positions in the environment.
+
+    :param x                (int): The x-coordinate of the starting point of the ray.
+    :param y                (int): The y-coordinate of the starting point of the ray.
+    :param alloc_angle      (int): The angle allocated to the ray in degrees, relative to the positive x-axis.
+    :param ego_angle        (int): The orientation of the ray caster's head in degrees.
+    :param max_length       (int): The maximum length of the ray.
+    :param color            (str, optional): The color of the ray, represented as a string (default is 'black').
     """
     def __init__(self, x, y, alloc_angle, ego_angle, max_length, color='black'):
         self.x1 = x
         self.y1 = y
 
-        self.degree_alloc_angle = alloc_angle
-        if alloc_angle>=360:
-            self.degree_alloc_angle-=360
-        if alloc_angle<0:
-            self.degree_alloc_angle+=360
-        self.alloc_angle = math.radians(self.degree_alloc_angle)
-
-        self.degree_ego_angle = ego_angle
-        if ego_angle>=360:
-            self.degree_ego_angle-=360
-        if ego_angle<0:
-            self.degree_ego_angle+=360
+        self.alloc_angle = normalize_angle_0_360(alloc_angle)
+        self.ego_angle = normalize_angle_0_360(ego_angle)
 
         self.length = 1
         self.max_length = max_length
 
-        self.x2 = self.x1 + self.length * math.cos(self.alloc_angle)
-        self.y2 = self.y1 + self.length * math.sin(self.alloc_angle)
+        self.x2 = self.x1 + self.length * math.cos(math.radians(self.alloc_angle))
+        self.y2 = self.y1 + self.length * math.sin(math.radians(self.alloc_angle))
 
         self.color = color
         self.color_num = 0
 
 
     def update(self, x, y, alloc_angle, box):
-        """Function update takes in an x, y, and angle, and updates the ray to this position and orientation"""
+        """
+        Updates the position and orientation of the ray to the given coordinates and angle.
+
+        :param x            (int): The x-coordinate of the ray's new position.
+        :param y            (int): The y-coordinate of the ray's new position.
+        :param alloc_angle  (int): The new allocentric angle in degrees of the ray's orientation.
+        :param box          (Box): The Box object representing the environment.
+        """
+
+        # Update the ray's position and orientation
         self.x1 = x
         self.y1 = y
-        self.degree_alloc_angle=alloc_angle
-        if alloc_angle>=360:
-            self.degree_alloc_angle-=360
-        if alloc_angle<0:
-            self.degree_alloc_angle+=360
-        self.alloc_angle = math.radians(alloc_angle)
+        self.alloc_angle = normalize_angle_0_360(alloc_angle)
 
+        # Check for collisions with walls in the environment and updates the end point of the ray
         ray_collision(self, box)
-
-        return
 
 
     def draw(self, display):

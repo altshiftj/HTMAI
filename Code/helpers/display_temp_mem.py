@@ -6,11 +6,25 @@ matplotlib.use("TkAgg")
 plt.ion()
 figure = plt.figure()
 
+"""
+This script provides functions for visualizing active cells and their activation frequencies for a given 
+temporal memory (TM) layer within a cortical column using scatter plots.
+
+Functions:
+- initialize_display: Initializes the grid for displaying active cells or activation frequencies of a given TM layer.
+- display: Receives a grid of active cells or activation frequencies and displays them on a scatter plot.
+- display_active_cells: Displays the active cells of a given temporal memory layer.
+- display_active_freq: Displays the activation frequency of cells in a given temporal memory layer.
+"""
+
 
 def initialize_display(tm, tm_info):
-    """Function initialize_display receives an animal and specfic layer within the brains cortical column.
-    Initalize set a"""
+    """
+    Function initialize_display receives an animal and specfic layer within the cortical column.
 
+    :param tm           (TemporalMemory): The temporal memory of the cortical column layer.
+    :param tm_info      (Metrics): Metric object containing information about the temporal memory.
+    """
     num_cells = tm_info.dimensions[0]
     tm_depth = tm.getCellsPerColumn()
 
@@ -33,6 +47,11 @@ def initialize_display(tm, tm_info):
 
 
 def display(grid):
+    """
+    Function display receives a grid of active cells and displays them on a scatter plot.
+
+    :param grid    (np.array): A grid of active cells.
+    """
     marker_size = 4
     plt.scatter(grid[:, 0], grid[:, 1], c=grid[:, 2], s=30)
     figure.canvas.draw()
@@ -40,6 +59,12 @@ def display(grid):
 
 
 def display_active_cells(tm, tm_info):
+    """
+    Function display_active_cells displays the active cells of a given temporal memory.
+
+    :param tm           (TemporalMemory): Temporal memory layer of the cortical column.
+    :param tm_info      (Metrics): Metric object containing information about the temporal memory.
+    """
     active_cells = tm.getActiveCells()
     grid = initialize_display(tm, tm_info)
 
@@ -50,6 +75,12 @@ def display_active_cells(tm, tm_info):
 
 
 def display_active_freq(tm, tm_info):
+    """
+    Function display_active_freq displays the activation frequency of cells in a given temporal memory layer.
+
+    :param tm           (TemporalMemory): Temporal memory layer of the cortical column.
+    :param tm_info      (Metrics): Metric object containing information about the temporal memory.
+    """
     active_freq = tm_info.activationFrequency.activationFrequency
     grid = initialize_display(tm, tm_info)
 
