@@ -14,7 +14,7 @@ HTM_MouseSim is a simulation project that models the neural activity of the mamm
 ## Background 
 Mammals, such as rats, exhibit fascinating neural firing patterns while navigating their environments. Some neurons fire based on specific locations (i.e., [place cells](https://en.wikipedia.org/wiki/Place_cell)), head orientations (i.e., [head-direction cells](https://en.wikipedia.org/wiki/Head_direction_cell)), environment boundaries (i.e., [boundary cells](https://en.wikipedia.org/wiki/Boundary_cell)), grid-like patterns (i.e., [grid cells](https://en.wikipedia.org/wiki/Grid_cell)). HTM_MouseSim aims to reproduce these neural activities by implementing a mobile agent (a mouse) with a simulated "brain" based on the HTM architecture. HTM is a neuroscientific theory suggesting that the navigation and conscious regions of the brain consist of layered columns. Neurons in different layers interconnect and interpret various subsets of input, such as motor and sensory input. Other layers within the same column are thought to compile sensory and motor activity into concrete representations, called objects. 
 
-### Valueable Video Resources
+### Valuable Video Resources
 - [HTM Theory - Summarized by Jeff Hawkins](https://www.youtube.com/watch?v=VqDVUWgJQPI)
 - [How Your Brain Organizes Information - Neurosummary by Artem Kirsanov](https://www.youtube.com/watch?v=9qOaII_PzGY&t=1378s)
 - [HTM School - Playlist by Matt Taylor dealing with the architecture of HTM](https://www.youtube.com/playlist?list=PL3yXMgtrZmDqhsFQzwUC9V8MeeVOQ7eZ9)
