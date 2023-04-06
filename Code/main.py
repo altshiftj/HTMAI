@@ -7,8 +7,6 @@ import pygame.font
 matplotlib.use("TkAgg")
 
 from helpers.display_temp_mem import *
-#from helpers.save_3d_scatters import *
-#from Code.helpers.print_cells_csv import *
 from helpers.neural_activity_read_write import sort_cell_activity, save_3d_scatters
 
 plt.ion()

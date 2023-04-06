@@ -29,12 +29,12 @@ class CorticalColumn:
 
         # SDR composed of encoded ray's angle, as well as the feedback it senses and sends back
         ray_encoding_width = 64 * 64
-        self.vision_SDR = htm.SDR([ray_encoding_width])
+        self.vision_SDR = SDR([ray_encoding_width])
         self.encoded_vision = []
 
         # Encoded feedforward input from movement
         movement_encoding_width = 64 * 64
-        self.movement_SDR = htm.SDR([movement_encoding_width])
+        self.movement_SDR = SDR([movement_encoding_width])
         self.encoded_movement = []
 
         # Ray Angle encoder parameters
@@ -103,7 +103,7 @@ class CorticalColumn:
 
         # Ray Angle and Length Encoders
         self.ray_angle_encoder = rdse_encoder(angle_enc_param)
-        self.ray_feedback_encoder = rdse_encoder(color_enc_param)
+        self.ray_color_encoder = rdse_encoder(color_enc_param)
         self.vision_enc_info = Metrics([self.vision_SDR.size], 999999999)
 
         # Turn and Speed Encoders
@@ -280,13 +280,13 @@ class CorticalColumn:
 
             # Encode ray angles and feedback
             ray_angle_SDR = self.ray_angle_encoder.encode(int(ray.ego_angle))
-            ray_feedback_SDR = self.ray_feedback_encoder.encode(ray.color_num)
+            ray_color_sdr = self.ray_color_encoder.encode(ray.color_num)
 
             # Create ray SDR whose size is the sum of the sizes of angle and feedback SDRs
-            ray_SDR = htm.SDR(ray_angle_SDR.size)
+            ray_SDR = SDR(ray_angle_SDR.size)
 
             # Make ray SDR represent both ray angle and feedback via concatentation
-            ray_SDR.union(ray_feedback_SDR, ray_angle_SDR)
+            ray_SDR.union(ray_color_sdr, ray_angle_SDR)
 
             # Add ray SDR to list of SDRs representing vision
             self.encoded_vision.append(ray_SDR)
